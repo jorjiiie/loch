@@ -24,7 +24,7 @@
 
 #define NUMCONTEXTS 10 /* how many contexts to make */
 #define STACKSIZE 4096 /* stack size */
-#define INTERVAL 100   /* timer interval in ms */
+#define INTERVAL 1     /* timer interval in ms */
 
 sigset_t set;              /* process wide signal mask */
 ucontext_t signal_context; /* the interrupt context */
@@ -36,17 +36,21 @@ ucontext_t *cur_context;          /* a pointer to the current_context */
 
 _Atomic int switch_flag = 0;
 _Atomic int x = 0;
+_Atomic int xx = 0;
 /* The scheduling algorithm; selects the next context to run, then starts
    it. */
 void scheduler() {
-  atomic_store(&switch_flag, 0);
+  int y = atomic_load(&x);
+  int z = atomic_load(&xx);
 
-  printf("scheduling out thread %d %d\n", curcontext, x);
+  if (y)
+    printf("scheduling out thread %d %d %d\n", curcontext, y, z);
 
   curcontext = (curcontext + 1) % NUMCONTEXTS; /* round robin */
   cur_context = &contexts[curcontext];
 
-  printf("scheduling in thread %d\n", curcontext);
+  if (y)
+    printf("scheduling in thread %d\n", curcontext);
 
   setcontext(cur_context); /* go */
 }
@@ -60,9 +64,14 @@ void scheduler() {
 void timer_interrupt(int j, siginfo_t *si, void *old_context) {
   /* Create new scheduler context */
   int exp = 0;
+  x++; // x counts the number of "bad" context switches (we haven't finished
+       // jumping yet)
   if (atomic_compare_exchange_weak(&switch_flag, &exp, 1) == 0)
     return;
+  x--;
+  xx++;
   getcontext(&signal_context);
+
   signal_context.uc_stack.ss_sp = signal_stack;
   signal_context.uc_stack.ss_size = STACKSIZE;
   signal_context.uc_stack.ss_flags = 0;
@@ -71,7 +80,7 @@ void timer_interrupt(int j, siginfo_t *si, void *old_context) {
 
   /* save running thread, jump to scheduler */
   swapcontext(cur_context, &signal_context);
-  // resumes from here!
+  atomic_store(&switch_flag, 0); //
 }
 
 /* Set up SIGALRM signal handler */
@@ -93,6 +102,8 @@ void setup_signals(void) {
 /* Thread bodies */
 void thread1() {
   printf("what lol\n");
+  atomic_store(&switch_flag,
+               0); // initialize on start so we can jump out safely
   while (1) {
     poll(NULL, 0, 100);
   }; /* do nothing nicely */
@@ -101,6 +112,7 @@ void thread1() {
 void thread2() {
   char buf[1024];
   static int x = 0;
+  atomic_store(&switch_flag, 0);
   /* get a string.. print a string.. ad infinitum */
   while (1) {
     fgets(buf, 1024, stdin);
