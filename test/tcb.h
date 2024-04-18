@@ -7,6 +7,7 @@
 #endif
 
 #include <stdatomic.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <ucontext.h>
 
@@ -31,7 +32,7 @@ tcb_t *tcb_create(uint64_t arg);
 void schedule();
 
 // queue of jobs
-#define NUM_TASKS 3
+#define NUM_TASKS 10
 typedef struct job_queue {
   tcb_t *tasks[NUM_TASKS];
   _Atomic size_t cur_task;

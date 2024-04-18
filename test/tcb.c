@@ -1,3 +1,7 @@
+#define DEBUG_LOG 1
+#include "tcb.h"
+#include "debug.h"
+
 #include <poll.h>
 #include <signal.h>
 #include <stdio.h>
@@ -8,9 +12,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define DEBUG_LOG 1
-#include "debug.h"
-#include "tcb.h"
 kthread_t ct;
 
 // in loch, this will call the launchpad with the closure.
@@ -26,29 +27,31 @@ void tcb_run(tcb_t *tcb, uint64_t arg) {
     printf("hi! from %llu %d\n", arg, ++i);
     poll(NULL, 0, 1000);
   }
+  debug_print("GG!!!");
   munmap(tcb->ctx.uc_stack.ss_sp, LOCH_STACK_SIZE);
   atomic_store(&tcb->res, 0); // put the result in
   schedule();                 // so we don't actually exit
 }
 void tcb_init(tcb_t *tcb, uint64_t arg) {
+  // memset(tcb, 0, sizeof(tcb_t));
   tcb->closure = arg;
   getcontext(&tcb->ctx);
 
   // tcb->ctx.uc_stack.ss_sp = mmap(NULL, LOCH_STACK_SIZE, PROT_READ |
   // PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
   tcb->ctx.uc_stack.ss_sp = malloc(LOCH_STACK_SIZE);
+  memset(tcb->ctx.uc_stack.ss_sp, 0, LOCH_STACK_SIZE);
   tcb->ctx.uc_stack.ss_size = LOCH_STACK_SIZE;
   tcb->ctx.uc_stack.ss_flags = 0;
 
-  tcb->ctx.uc_link = NULL;
   if (sigemptyset(&tcb->ctx.uc_sigmask) < 0) {
     perror("sigemptyset");
     exit(1);
   }
 
+  tcb->state = NOT_RUNNING;
   makecontext(&tcb->ctx, (void (*)(tcb_t *, uint64_t))tcb_run, 2, tcb, arg);
 
-  tcb->state = NOT_RUNNING;
   printf("init tcb %p %llu\n", tcb, arg);
 }
 tcb_t *tcb_create(uint64_t arg) {
@@ -67,18 +70,14 @@ void schedule() {
   c_ctx->state = NOT_RUNNING;
 
   tcb_t *old = c_ctx;
-  //  c_ctx = get_next_tcb(&ct);
-  c_ctx = tcb_create(1);
+  c_ctx = get_next_tcb(&ct);
   c_ctx->state = RUNNING;
-  debug_print("about to schedule new shit %p %p", old, c_ctx);
-
   setcontext(&c_ctx->ctx);
   atomic_store(&ct.switch_flag, 0);
 }
 
 void timer_interrupt(int j, siginfo_t *si, void *old_ctx) {
   int zero = 0;
-  debug_print("why ok");
   if (atomic_compare_exchange_strong(&ct.switch_flag, &zero, 1) == 0)
     return;
   getcontext(&signal_context);
@@ -93,23 +92,13 @@ void timer_interrupt(int j, siginfo_t *si, void *old_ctx) {
   atomic_store(&ct.switch_flag, 0);
 }
 
-queue_t job_queue;
-tcb_t q[NUM_TASKS];
+tcb_t *why;
+
+tcb_t *q2[NUM_TASKS];
 int cnter = 0;
 tcb_t *get_next_tcb(kthread_t *kt) {
   cnter = (cnter + 1) % NUM_TASKS;
-  return &q[cnter];
-
-  size_t pos;
-  size_t desired;
-  do {
-    pos = atomic_load(&job_queue.cur_task);
-    desired = (pos + 1) % NUM_TASKS;
-  } while (!atomic_compare_exchange_weak(&job_queue.cur_task, &pos, desired));
-
-  printf("next tcb %lu\n", desired);
-  tcb_t *tcb = job_queue.tasks[desired];
-  return tcb;
+  return q2[cnter];
 }
 
 void setup_signals(void) {
@@ -131,15 +120,7 @@ void setup_signals(void) {
 int main() {
   atomic_store(&ct.switch_flag, 1);
   signal_stack = malloc(4096);
-  memset(q, 0, sizeof(q));
 
-  // c_ctx = job_queue.tasks[0];
-  for (int i = 0; i < NUM_TASKS; i++) {
-    tcb_init(&q[i], i);
-  }
-  c_ctx = &q[0];
-
-  int i;
   struct itimerval it;
   setup_signals();
 
@@ -151,8 +132,15 @@ int main() {
     perror("setitiimer");
   debug_print("help");
 
-  c_ctx = tcb_create(0);
+  for (int i = 0; i < NUM_TASKS; i++) {
+    q2[i] = tcb_create(i);
+  }
+
+  c_ctx = q2[0];
+
   atomic_store(&ct.switch_flag, 0);
 
   setcontext(&c_ctx->ctx);
+
+  return 0;
 }
