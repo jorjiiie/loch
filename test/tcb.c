@@ -37,9 +37,8 @@ void tcb_init(tcb_t *tcb, uint64_t arg) {
   tcb->closure = arg;
   getcontext(&tcb->ctx);
 
-  // tcb->ctx.uc_stack.ss_sp = mmap(NULL, LOCH_STACK_SIZE, PROT_READ |
-  // PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
-  tcb->ctx.uc_stack.ss_sp = malloc(LOCH_STACK_SIZE);
+  tcb->ctx.uc_stack.ss_sp = mmap(NULL, LOCH_STACK_SIZE, PROT_READ | PROT_WRITE,
+                                 MAP_PRIVATE | MAP_ANON, -1, 0);
   memset(tcb->ctx.uc_stack.ss_sp, 0, LOCH_STACK_SIZE);
   tcb->ctx.uc_stack.ss_size = LOCH_STACK_SIZE;
   tcb->ctx.uc_stack.ss_flags = 0;

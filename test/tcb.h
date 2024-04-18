@@ -3,7 +3,7 @@
 #define TCB_H
 
 #ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE 600
+#define _XOPEN_SOURCE
 #endif
 
 #include <stdatomic.h>
