@@ -1,0 +1,1 @@
+thread(lambda(x): 1)

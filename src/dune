@@ -1,0 +1,21 @@
+(library
+  (name loch_impl)
+  (modules assembly compile errors exprs phases pretty runner lexer parser)
+  (libraries ounit2 extlib unix)
+  (wrapped false))
+
+(ocamllex (modules lexer))
+(menhir (modules parser))
+
+(executable
+  (name main)
+  (modules main)
+  (libraries loch_impl))
+
+(test
+  (name test)
+  (modules test)
+  (libraries loch_impl))
+
+(env (dev (flags (:standard -warn-error -A))))
+

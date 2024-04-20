@@ -1,0 +1,4 @@
+let x = (2, 3) in
+	let y = (1, x) in
+		let (a, b) = (x, y, x) in
+			print(a);print(b)

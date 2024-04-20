@@ -1,0 +1,8 @@
+def map(f, l):
+	if (l == nil): nil
+	else:
+	let (h, t) = l in
+		(f(h), map(f, t))
+
+let add_1 = (lambda (x): x + 1) in
+	map(add_1, (1, (2, (3, (4, (5, nil))))))

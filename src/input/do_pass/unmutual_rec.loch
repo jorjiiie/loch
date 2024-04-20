@@ -1,0 +1,2 @@
+let rec g = (lambda(x): if x <= 0: x else: g(x - 2)), f = (lambda (x): if x >= 0: g(x) + f(x - 1) else: -100) in
+	f(1)

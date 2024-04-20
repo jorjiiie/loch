@@ -1,0 +1,2 @@
+let rec f = (lambda (x): if x <= 0: x else: x + f(x - 1)) in
+	f(10)

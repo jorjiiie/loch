@@ -1,0 +1,5 @@
+def f(x):
+	x + 1
+
+let rec f = (lambda: 2) in
+	f

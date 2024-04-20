@@ -1,0 +1,3 @@
+let rec f = (lambda: 1) in
+	let rec f = (lambda: 2) in
+		f

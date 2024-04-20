@@ -1,0 +1,2 @@
+let rec x = 4, y = (lambda (a): a + 1) in
+	y(x)

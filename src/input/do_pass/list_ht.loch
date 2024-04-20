@@ -1,0 +1,4 @@
+let l = (1, (2, (true, nil))) in
+	let (h, t) = l in
+		print(h);
+		t

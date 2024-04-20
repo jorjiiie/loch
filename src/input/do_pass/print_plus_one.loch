@@ -1,0 +1,4 @@
+def plus_one_print(x):
+	print(x+1)
+
+plus_one_print(1)

@@ -1,0 +1,29 @@
+
+def link(first, rest):
+  (first, rest)
+
+def length(l):
+  if l == nil: 0
+  else:
+    1 + length(l[1])
+	
+def sum(l):
+	if l == nil: 0
+	else:
+		let (h, t) = l in
+			h + sum(t)
+		
+def append(l1, l2):
+	if l1 == nil: l2
+	else:
+		let (h, t) = l1 in
+			link(h, append(t, l2))
+
+def reverse(l):
+	if l == nil: nil
+	else:
+		let (h, t) = l in
+			append(reverse(t), link(h, nil))
+
+let l1 = link(1, link(2, link(true, link(false, link(2, nil))))) in
+	equal(l1, reverse(reverse(l1)))

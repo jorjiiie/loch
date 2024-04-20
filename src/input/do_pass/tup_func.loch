@@ -1,0 +1,6 @@
+def f((x, y)):
+	let a = x in
+	let b = y in
+		(x, y, a + b)
+
+print(f((1,2)))

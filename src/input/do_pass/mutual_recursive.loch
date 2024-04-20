@@ -1,0 +1,6 @@
+def a(x):
+	if x < 0: 1 else: b(x - 1)
+and def b(x):
+	if x < 0: -1 else: a(x - 1)
+
+a(10)

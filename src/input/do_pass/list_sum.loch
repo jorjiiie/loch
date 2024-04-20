@@ -1,0 +1,16 @@
+def link(first, rest):
+  (first, rest)
+
+def length(l):
+  if l == nil: 0
+  else:
+    1 + length(l[1])
+	
+def sum(l):
+	if l == nil: 0
+	else:
+		let (h, t) = l in
+			h + sum(t)
+	
+let l = link(1, link(2, link(3, nil))) in
+	sum(l)

@@ -1,0 +1,6 @@
+def f(a, b, c):
+	let x = 2 in
+		let y = 3 in
+			a + x + y + b
+
+f(4, 5, 6)

@@ -1,0 +1,11 @@
+def a(x):
+    if x < 0: 5 else: b(x - 1)
+and def b(x):
+    if x < 0: -5 else: a(x - 1)
+
+def c(x):
+    if x < 0: 22 else: a(x - 1) + d(x - 1)
+and def d(x):
+    if x < 0: -22 else: b(x - 1) + c(x - 1)
+
+a(10) + c(10)

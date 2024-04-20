@@ -1,0 +1,4 @@
+def ident(a, b):
+	a
+
+ident(10, 2)

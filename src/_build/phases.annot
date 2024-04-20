@@ -1,0 +1,1924 @@
+"phases.ml" 34 1157 1161 "phases.ml" 34 1157 1167
+type(
+  string -> phase
+)
+ident(
+  def source "phases.ml" 35 1181 1181 "phases.ml" 0 0 -1
+)
+"phases.ml" 34 1157 1168 "phases.ml" 34 1157 1169
+type(
+  string
+)
+ident(
+  def s "phases.ml" 34 1157 1172 "phases.ml" 34 1157 1180
+)
+"phases.ml" 34 1157 1179 "phases.ml" 34 1157 1180
+type(
+  string
+)
+ident(
+  int_ref s "phases.ml" 34 1157 1168 "phases.ml" 34 1157 1169
+)
+"phases.ml" 34 1157 1172 "phases.ml" 34 1157 1180
+type(
+  phase
+)
+"phases.ml" 35 1181 1185 "phases.ml" 35 1181 1191
+type(
+  Exprs.sourcespan Exprs.program -> phase
+)
+ident(
+  def parsed "phases.ml" 36 1205 1205 "phases.ml" 0 0 -1
+)
+"phases.ml" 35 1181 1192 "phases.ml" 35 1181 1193
+type(
+  Exprs.sourcespan Exprs.program
+)
+ident(
+  def p "phases.ml" 35 1181 1196 "phases.ml" 35 1181 1204
+)
+"phases.ml" 35 1181 1203 "phases.ml" 35 1181 1204
+type(
+  Exprs.sourcespan Exprs.program
+)
+ident(
+  int_ref p "phases.ml" 35 1181 1192 "phases.ml" 35 1181 1193
+)
+"phases.ml" 35 1181 1196 "phases.ml" 35 1181 1204
+type(
+  phase
+)
+"phases.ml" 36 1205 1209 "phases.ml" 36 1205 1220
+type(
+  Exprs.sourcespan Exprs.program -> phase
+)
+ident(
+  def well_formed "phases.ml" 37 1238 1238 "phases.ml" 0 0 -1
+)
+"phases.ml" 36 1205 1221 "phases.ml" 36 1205 1222
+type(
+  Exprs.sourcespan Exprs.program
+)
+ident(
+  def p "phases.ml" 36 1205 1225 "phases.ml" 36 1205 1237
+)
+"phases.ml" 36 1205 1236 "phases.ml" 36 1205 1237
+type(
+  Exprs.sourcespan Exprs.program
+)
+ident(
+  int_ref p "phases.ml" 36 1205 1221 "phases.ml" 36 1205 1222
+)
+"phases.ml" 36 1205 1225 "phases.ml" 36 1205 1237
+type(
+  phase
+)
+"phases.ml" 37 1238 1242 "phases.ml" 37 1238 1249
+type(
+  Exprs.tag Exprs.program -> phase
+)
+ident(
+  def renamed "phases.ml" 38 1264 1264 "phases.ml" 0 0 -1
+)
+"phases.ml" 37 1238 1250 "phases.ml" 37 1238 1251
+type(
+  Exprs.tag Exprs.program
+)
+ident(
+  def p "phases.ml" 37 1238 1254 "phases.ml" 37 1238 1263
+)
+"phases.ml" 37 1238 1262 "phases.ml" 37 1238 1263
+type(
+  Exprs.tag Exprs.program
+)
+ident(
+  int_ref p "phases.ml" 37 1238 1250 "phases.ml" 37 1238 1251
+)
+"phases.ml" 37 1238 1254 "phases.ml" 37 1238 1263
+type(
+  phase
+)
+"phases.ml" 38 1264 1268 "phases.ml" 38 1264 1277
+type(
+  Exprs.sourcespan Exprs.program -> phase
+)
+ident(
+  def desugared "phases.ml" 39 1294 1294 "phases.ml" 0 0 -1
+)
+"phases.ml" 38 1264 1278 "phases.ml" 38 1264 1279
+type(
+  Exprs.sourcespan Exprs.program
+)
+ident(
+  def p "phases.ml" 38 1264 1282 "phases.ml" 38 1264 1293
+)
+"phases.ml" 38 1264 1292 "phases.ml" 38 1264 1293
+type(
+  Exprs.sourcespan Exprs.program
+)
+ident(
+  int_ref p "phases.ml" 38 1264 1278 "phases.ml" 38 1264 1279
+)
+"phases.ml" 38 1264 1282 "phases.ml" 38 1264 1293
+type(
+  phase
+)
+"phases.ml" 39 1294 1298 "phases.ml" 39 1294 1304
+type(
+  Exprs.tag Exprs.program -> phase
+)
+ident(
+  def tagged "phases.ml" 40 1318 1318 "phases.ml" 0 0 -1
+)
+"phases.ml" 39 1294 1305 "phases.ml" 39 1294 1306
+type(
+  Exprs.tag Exprs.program
+)
+ident(
+  def p "phases.ml" 39 1294 1309 "phases.ml" 39 1294 1317
+)
+"phases.ml" 39 1294 1316 "phases.ml" 39 1294 1317
+type(
+  Exprs.tag Exprs.program
+)
+ident(
+  int_ref p "phases.ml" 39 1294 1305 "phases.ml" 39 1294 1306
+)
+"phases.ml" 39 1294 1309 "phases.ml" 39 1294 1317
+type(
+  phase
+)
+"phases.ml" 40 1318 1322 "phases.ml" 40 1318 1327
+type(
+  Exprs.tag Exprs.aprogram -> phase
+)
+ident(
+  def anfed "phases.ml" 41 1340 1340 "phases.ml" 0 0 -1
+)
+"phases.ml" 40 1318 1328 "phases.ml" 40 1318 1329
+type(
+  Exprs.tag Exprs.aprogram
+)
+ident(
+  def p "phases.ml" 40 1318 1332 "phases.ml" 40 1318 1339
+)
+"phases.ml" 40 1318 1338 "phases.ml" 40 1318 1339
+type(
+  Exprs.tag Exprs.aprogram
+)
+ident(
+  int_ref p "phases.ml" 40 1318 1328 "phases.ml" 40 1318 1329
+)
+"phases.ml" 40 1318 1332 "phases.ml" 40 1318 1339
+type(
+  phase
+)
+"phases.ml" 41 1340 1344 "phases.ml" 41 1340 1355
+type(
+  Exprs.sourcespan Exprs.program -> phase
+)
+ident(
+  def add_natives "phases.ml" 42 1375 1375 "phases.ml" 0 0 -1
+)
+"phases.ml" 41 1340 1356 "phases.ml" 41 1340 1357
+type(
+  Exprs.sourcespan Exprs.program
+)
+ident(
+  def p "phases.ml" 41 1340 1360 "phases.ml" 41 1340 1374
+)
+"phases.ml" 41 1340 1373 "phases.ml" 41 1340 1374
+type(
+  Exprs.sourcespan Exprs.program
+)
+ident(
+  int_ref p "phases.ml" 41 1340 1356 "phases.ml" 41 1340 1357
+)
+"phases.ml" 41 1340 1360 "phases.ml" 41 1340 1374
+type(
+  phase
+)
+"phases.ml" 42 1375 1379 "phases.ml" 42 1375 1394
+type(
+  Exprs.tag Exprs.aprogram * Assembly.arg name_envt name_envt -> phase
+)
+ident(
+  def locate_bindings "phases.ml" 43 1417 1417 "phases.ml" 0 0 -1
+)
+"phases.ml" 42 1375 1395 "phases.ml" 42 1375 1396
+type(
+  Exprs.tag Exprs.aprogram
+)
+ident(
+  def p "phases.ml" 42 1375 1403 "phases.ml" 42 1375 1416
+)
+"phases.ml" 42 1375 1398 "phases.ml" 42 1375 1399
+type(
+  Assembly.arg name_envt name_envt
+)
+ident(
+  def e "phases.ml" 42 1375 1403 "phases.ml" 42 1375 1416
+)
+"phases.ml" 42 1375 1394 "phases.ml" 42 1375 1400
+type(
+  Exprs.tag Exprs.aprogram * Assembly.arg name_envt name_envt
+)
+"phases.ml" 42 1375 1411 "phases.ml" 42 1375 1412
+type(
+  Exprs.tag Exprs.aprogram
+)
+ident(
+  int_ref p "phases.ml" 42 1375 1395 "phases.ml" 42 1375 1396
+)
+"phases.ml" 42 1375 1414 "phases.ml" 42 1375 1415
+type(
+  Assembly.arg name_envt name_envt
+)
+ident(
+  int_ref e "phases.ml" 42 1375 1398 "phases.ml" 42 1375 1399
+)
+"phases.ml" 42 1375 1403 "phases.ml" 42 1375 1416
+type(
+  phase
+)
+"phases.ml" 43 1417 1421 "phases.ml" 43 1417 1427
+type(
+  string -> phase
+)
+ident(
+  def result "phases.ml" 48 1592 1592 "phases.ml" 0 0 -1
+)
+"phases.ml" 43 1417 1428 "phases.ml" 43 1417 1429
+type(
+  string
+)
+ident(
+  def s "phases.ml" 43 1417 1432 "phases.ml" 43 1417 1440
+)
+"phases.ml" 43 1417 1439 "phases.ml" 43 1417 1440
+type(
+  string
+)
+ident(
+  int_ref s "phases.ml" 43 1417 1428 "phases.ml" 43 1417 1429
+)
+"phases.ml" 43 1417 1432 "phases.ml" 43 1417 1440
+type(
+  phase
+)
+"phases.ml" 64 2375 2379 "phases.ml" 64 2375 2392
+type(
+  ('b -> phase) -> ('a -> 'b fallible) -> 'a pipeline -> 'b pipeline
+)
+ident(
+  def add_err_phase "phases.ml" 85 3232 3232 "phases.ml" 0 0 -1
+)
+"phases.ml" 65 2393 2400 "phases.ml" 65 2393 2403
+type(
+  'b -> phase
+)
+type(
+  'b -> phase
+)
+ident(
+  def log "phases.ml" 66 2419 2425 "phases.ml" 78 2827 2919
+)
+"phases.ml" 66 2419 2426 "phases.ml" 66 2419 2430
+type(
+  'a -> 'b fallible
+)
+type(
+  'a -> 'b fallible
+)
+ident(
+  def next "phases.ml" 67 2452 2458 "phases.ml" 78 2827 2919
+)
+"phases.ml" 67 2452 2459 "phases.ml" 67 2452 2471
+type(
+  'a pipeline
+)
+type(
+  'a pipeline
+)
+ident(
+  def cur_pipeline "phases.ml" 69 2507 2509 "phases.ml" 78 2827 2919
+)
+"phases.ml" 69 2507 2515 "phases.ml" 69 2507 2527
+type(
+  'a pipeline
+)
+ident(
+  int_ref cur_pipeline "phases.ml" 67 2452 2459 "phases.ml" 67 2452 2471
+)
+"phases.ml" 70 2533 2544 "phases.ml" 70 2533 2548
+type(
+  exn list
+)
+ident(
+  def errs "phases.ml" 70 2533 2560 "phases.ml" 70 2533 2579
+)
+"phases.ml" 70 2533 2550 "phases.ml" 70 2533 2555
+type(
+  phase list
+)
+ident(
+  def trace "phases.ml" 70 2533 2560 "phases.ml" 70 2533 2579
+)
+"phases.ml" 70 2533 2543 "phases.ml" 70 2533 2556
+type(
+  exn list * phase list
+)
+"phases.ml" 70 2533 2537 "phases.ml" 70 2533 2556
+type(
+  'a pipeline
+)
+type(
+  'a pipeline
+)
+"phases.ml" 70 2533 2567 "phases.ml" 70 2533 2571
+type(
+  exn list
+)
+ident(
+  int_ref errs "phases.ml" 70 2533 2544 "phases.ml" 70 2533 2548
+)
+"phases.ml" 70 2533 2573 "phases.ml" 70 2533 2578
+type(
+  phase list
+)
+ident(
+  int_ref trace "phases.ml" 70 2533 2550 "phases.ml" 70 2533 2555
+)
+"phases.ml" 70 2533 2566 "phases.ml" 70 2533 2579
+type(
+  failure
+)
+"phases.ml" 70 2533 2560 "phases.ml" 70 2533 2579
+type(
+  'b pipeline
+)
+"phases.ml" 71 2580 2588 "phases.ml" 71 2580 2595
+type(
+  'a
+)
+ident(
+  def cur_val "phases.ml" 72 2607 2612 "phases.ml" 78 2827 2919
+)
+"phases.ml" 71 2580 2597 "phases.ml" 71 2580 2602
+type(
+  phase list
+)
+ident(
+  def trace "phases.ml" 72 2607 2612 "phases.ml" 78 2827 2919
+)
+"phases.ml" 71 2580 2587 "phases.ml" 71 2580 2603
+type(
+  'a * phase list
+)
+"phases.ml" 71 2580 2584 "phases.ml" 71 2580 2603
+type(
+  'a pipeline
+)
+type(
+  'a pipeline
+)
+"phases.ml" 73 2616 2630 "phases.ml" 73 2616 2634
+type(
+  'a -> 'b fallible
+)
+ident(
+  int_ref next "phases.ml" 66 2419 2426 "phases.ml" 66 2419 2430
+)
+"phases.ml" 73 2616 2635 "phases.ml" 73 2616 2642
+type(
+  'a
+)
+ident(
+  int_ref cur_val "phases.ml" 71 2580 2588 "phases.ml" 71 2580 2595
+)
+"phases.ml" 73 2616 2629 "phases.ml" 73 2616 2643
+type(
+  'b fallible
+)
+"phases.ml" 74 2649 2664 "phases.ml" 74 2649 2668
+type(
+  exn list
+)
+ident(
+  def errs "phases.ml" 74 2649 2672 "phases.ml" 74 2649 2690
+)
+"phases.ml" 74 2649 2658 "phases.ml" 74 2649 2668
+type(
+  'b fallible
+)
+type(
+  'b fallible
+)
+"phases.ml" 74 2649 2678 "phases.ml" 74 2649 2682
+type(
+  exn list
+)
+ident(
+  int_ref errs "phases.ml" 74 2649 2664 "phases.ml" 74 2649 2668
+)
+"phases.ml" 74 2649 2684 "phases.ml" 74 2649 2689
+type(
+  phase list
+)
+ident(
+  int_ref trace "phases.ml" 71 2580 2597 "phases.ml" 71 2580 2602
+)
+"phases.ml" 74 2649 2677 "phases.ml" 74 2649 2690
+type(
+  failure
+)
+"phases.ml" 74 2649 2672 "phases.ml" 74 2649 2690
+type(
+  'b pipeline
+)
+"phases.ml" 75 2691 2703 "phases.ml" 75 2691 2710
+type(
+  'b
+)
+ident(
+  def new_val "phases.ml" 75 2691 2714 "phases.ml" 75 2691 2749
+)
+"phases.ml" 75 2691 2700 "phases.ml" 75 2691 2710
+type(
+  'b fallible
+)
+type(
+  'b fallible
+)
+"phases.ml" 75 2691 2717 "phases.ml" 75 2691 2724
+type(
+  'b
+)
+ident(
+  int_ref new_val "phases.ml" 75 2691 2703 "phases.ml" 75 2691 2710
+)
+"phases.ml" 75 2691 2727 "phases.ml" 75 2691 2730
+type(
+  'b -> phase
+)
+ident(
+  int_ref log "phases.ml" 65 2393 2400 "phases.ml" 65 2393 2403
+)
+"phases.ml" 75 2691 2731 "phases.ml" 75 2691 2738
+type(
+  'b
+)
+ident(
+  int_ref new_val "phases.ml" 75 2691 2703 "phases.ml" 75 2691 2710
+)
+"phases.ml" 75 2691 2726 "phases.ml" 75 2691 2739
+type(
+  phase
+)
+"phases.ml" 75 2691 2743 "phases.ml" 75 2691 2748
+type(
+  phase list
+)
+ident(
+  int_ref trace "phases.ml" 71 2580 2597 "phases.ml" 71 2580 2602
+)
+"phases.ml" 75 2691 2726 "phases.ml" 75 2691 2748
+type(
+  phase list
+)
+"phases.ml" 75 2691 2716 "phases.ml" 75 2691 2749
+type(
+  'b * phase list
+)
+"phases.ml" 75 2691 2714 "phases.ml" 75 2691 2749
+type(
+  'b pipeline
+)
+"phases.ml" 73 2616 2623 "phases.ml" 75 2691 2749
+type(
+  'b pipeline
+)
+"phases.ml" 77 2760 2775 "phases.ml" 77 2760 2776
+type(
+  string
+)
+ident(
+  def s "phases.ml" 77 2760 2780 "phases.ml" 77 2760 2826
+)
+"phases.ml" 77 2760 2767 "phases.ml" 77 2760 2776
+type(
+  exn
+)
+"phases.ml" 77 2760 2795 "phases.ml" 77 2760 2812
+type(
+  string
+)
+"phases.ml" 77 2760 2813 "phases.ml" 77 2760 2814
+type(
+  string -> string -> string
+)
+ident(
+  int_ref Stdlib.( ^ ) "stdlib.mli" 699 26389 26389 "stdlib.mli" 699 26389 26427
+)
+"phases.ml" 77 2760 2815 "phases.ml" 77 2760 2816
+type(
+  string
+)
+ident(
+  int_ref s "phases.ml" 77 2760 2775 "phases.ml" 77 2760 2776
+)
+"phases.ml" 77 2760 2794 "phases.ml" 77 2760 2817
+type(
+  string
+)
+"phases.ml" 77 2760 2787 "phases.ml" 77 2760 2817
+type(
+  exn
+)
+"phases.ml" 77 2760 2786 "phases.ml" 77 2760 2818
+type(
+  exn list
+)
+"phases.ml" 77 2760 2820 "phases.ml" 77 2760 2825
+type(
+  phase list
+)
+ident(
+  int_ref trace "phases.ml" 71 2580 2597 "phases.ml" 71 2580 2602
+)
+"phases.ml" 77 2760 2785 "phases.ml" 77 2760 2826
+type(
+  failure
+)
+"phases.ml" 77 2760 2780 "phases.ml" 77 2760 2826
+type(
+  'b pipeline
+)
+"phases.ml" 78 2827 2834 "phases.ml" 78 2827 2837
+type(
+  exn
+)
+ident(
+  def err "phases.ml" 78 2827 2841 "phases.ml" 78 2827 2919
+)
+"phases.ml" 78 2827 2856 "phases.ml" 78 2827 2884
+type(
+  string
+)
+"phases.ml" 78 2827 2885 "phases.ml" 78 2827 2886
+type(
+  string -> string -> string
+)
+ident(
+  int_ref Stdlib.( ^ ) "stdlib.mli" 699 26389 26389 "stdlib.mli" 699 26389 26427
+)
+"phases.ml" 78 2827 2887 "phases.ml" 78 2827 2905
+type(
+  exn -> string
+)
+ident(
+  int_ref Stdlib.Printexc.to_string "printexc.mli" 21 1213 1213 "printexc.mli" 21 1213 1241
+)
+"phases.ml" 78 2827 2906 "phases.ml" 78 2827 2909
+type(
+  exn
+)
+ident(
+  int_ref err "phases.ml" 78 2827 2834 "phases.ml" 78 2827 2837
+)
+"phases.ml" 78 2827 2887 "phases.ml" 78 2827 2909
+type(
+  string
+)
+"phases.ml" 78 2827 2855 "phases.ml" 78 2827 2910
+type(
+  string
+)
+"phases.ml" 78 2827 2848 "phases.ml" 78 2827 2910
+type(
+  exn
+)
+"phases.ml" 78 2827 2847 "phases.ml" 78 2827 2911
+type(
+  exn list
+)
+"phases.ml" 78 2827 2913 "phases.ml" 78 2827 2918
+type(
+  phase list
+)
+ident(
+  int_ref trace "phases.ml" 71 2580 2597 "phases.ml" 71 2580 2602
+)
+"phases.ml" 78 2827 2846 "phases.ml" 78 2827 2919
+type(
+  failure
+)
+"phases.ml" 78 2827 2841 "phases.ml" 78 2827 2919
+type(
+  'b pipeline
+)
+"phases.ml" 72 2607 2612 "phases.ml" 78 2827 2919
+type(
+  'b pipeline
+)
+"phases.ml" 69 2507 2509 "phases.ml" 78 2827 2919
+type(
+  'b pipeline
+)
+"phases.ml" 85 3232 3236 "phases.ml" 85 3232 3245
+type(
+  ('b -> phase) -> ('a -> 'b) -> 'a pipeline -> 'b pipeline
+)
+ident(
+  def add_phase "phases.ml" 101 3710 3710 "phases.ml" 0 0 -1
+)
+"phases.ml" 86 3246 3253 "phases.ml" 86 3246 3256
+type(
+  'b -> phase
+)
+type(
+  'b -> phase
+)
+ident(
+  def log "phases.ml" 87 3272 3278 "phases.ml" 98 3613 3705
+)
+"phases.ml" 87 3272 3279 "phases.ml" 87 3272 3283
+type(
+  'a -> 'b
+)
+type(
+  'a -> 'b
+)
+ident(
+  def next "phases.ml" 88 3296 3302 "phases.ml" 98 3613 3705
+)
+"phases.ml" 88 3296 3303 "phases.ml" 88 3296 3315
+type(
+  'a pipeline
+)
+type(
+  'a pipeline
+)
+ident(
+  def cur_pipeline "phases.ml" 90 3351 3353 "phases.ml" 98 3613 3705
+)
+"phases.ml" 90 3351 3359 "phases.ml" 90 3351 3371
+type(
+  'a pipeline
+)
+ident(
+  int_ref cur_pipeline "phases.ml" 88 3296 3303 "phases.ml" 88 3296 3315
+)
+"phases.ml" 91 3377 3387 "phases.ml" 91 3377 3391
+type(
+  exn list
+)
+ident(
+  def errs "phases.ml" 91 3377 3402 "phases.ml" 91 3377 3420
+)
+"phases.ml" 91 3377 3393 "phases.ml" 91 3377 3398
+type(
+  phase list
+)
+ident(
+  def trace "phases.ml" 91 3377 3402 "phases.ml" 91 3377 3420
+)
+"phases.ml" 91 3377 3386 "phases.ml" 91 3377 3399
+type(
+  exn list * phase list
+)
+"phases.ml" 91 3377 3381 "phases.ml" 91 3377 3399
+type(
+  'a pipeline
+)
+type(
+  'a pipeline
+)
+"phases.ml" 91 3377 3408 "phases.ml" 91 3377 3412
+type(
+  exn list
+)
+ident(
+  int_ref errs "phases.ml" 91 3377 3387 "phases.ml" 91 3377 3391
+)
+"phases.ml" 91 3377 3414 "phases.ml" 91 3377 3419
+type(
+  phase list
+)
+ident(
+  int_ref trace "phases.ml" 91 3377 3393 "phases.ml" 91 3377 3398
+)
+"phases.ml" 91 3377 3407 "phases.ml" 91 3377 3420
+type(
+  failure
+)
+"phases.ml" 91 3377 3402 "phases.ml" 91 3377 3420
+type(
+  'b pipeline
+)
+"phases.ml" 92 3421 3428 "phases.ml" 92 3421 3435
+type(
+  'a
+)
+ident(
+  def cur_val "phases.ml" 93 3447 3452 "phases.ml" 98 3613 3705
+)
+"phases.ml" 92 3421 3437 "phases.ml" 92 3421 3442
+type(
+  phase list
+)
+ident(
+  def trace "phases.ml" 93 3447 3452 "phases.ml" 98 3613 3705
+)
+"phases.ml" 92 3421 3427 "phases.ml" 92 3421 3443
+type(
+  'a * phase list
+)
+"phases.ml" 92 3421 3425 "phases.ml" 92 3421 3443
+type(
+  'a pipeline
+)
+type(
+  'a pipeline
+)
+"phases.ml" 94 3456 3467 "phases.ml" 94 3456 3474
+type(
+  'b
+)
+ident(
+  def new_val "phases.ml" 95 3493 3500 "phases.ml" 95 3493 3535
+)
+"phases.ml" 94 3456 3477 "phases.ml" 94 3456 3481
+type(
+  'a -> 'b
+)
+ident(
+  int_ref next "phases.ml" 87 3272 3279 "phases.ml" 87 3272 3283
+)
+"phases.ml" 94 3456 3482 "phases.ml" 94 3456 3489
+type(
+  'a
+)
+ident(
+  int_ref cur_val "phases.ml" 92 3421 3428 "phases.ml" 92 3421 3435
+)
+"phases.ml" 94 3456 3477 "phases.ml" 94 3456 3489
+type(
+  'b
+)
+"phases.ml" 95 3493 3503 "phases.ml" 95 3493 3510
+type(
+  'b
+)
+ident(
+  int_ref new_val "phases.ml" 94 3456 3467 "phases.ml" 94 3456 3474
+)
+"phases.ml" 95 3493 3513 "phases.ml" 95 3493 3516
+type(
+  'b -> phase
+)
+ident(
+  int_ref log "phases.ml" 86 3246 3253 "phases.ml" 86 3246 3256
+)
+"phases.ml" 95 3493 3517 "phases.ml" 95 3493 3524
+type(
+  'b
+)
+ident(
+  int_ref new_val "phases.ml" 94 3456 3467 "phases.ml" 94 3456 3474
+)
+"phases.ml" 95 3493 3512 "phases.ml" 95 3493 3525
+type(
+  phase
+)
+"phases.ml" 95 3493 3529 "phases.ml" 95 3493 3534
+type(
+  phase list
+)
+ident(
+  int_ref trace "phases.ml" 92 3421 3437 "phases.ml" 92 3421 3442
+)
+"phases.ml" 95 3493 3512 "phases.ml" 95 3493 3534
+type(
+  phase list
+)
+"phases.ml" 95 3493 3502 "phases.ml" 95 3493 3535
+type(
+  'b * phase list
+)
+"phases.ml" 95 3493 3500 "phases.ml" 95 3493 3535
+type(
+  'b pipeline
+)
+"phases.ml" 94 3456 3463 "phases.ml" 95 3493 3535
+type(
+  'b pipeline
+)
+"phases.ml" 97 3546 3561 "phases.ml" 97 3546 3562
+type(
+  string
+)
+ident(
+  def s "phases.ml" 97 3546 3566 "phases.ml" 97 3546 3612
+)
+"phases.ml" 97 3546 3553 "phases.ml" 97 3546 3562
+type(
+  exn
+)
+"phases.ml" 97 3546 3581 "phases.ml" 97 3546 3598
+type(
+  string
+)
+"phases.ml" 97 3546 3599 "phases.ml" 97 3546 3600
+type(
+  string -> string -> string
+)
+ident(
+  int_ref Stdlib.( ^ ) "stdlib.mli" 699 26389 26389 "stdlib.mli" 699 26389 26427
+)
+"phases.ml" 97 3546 3601 "phases.ml" 97 3546 3602
+type(
+  string
+)
+ident(
+  int_ref s "phases.ml" 97 3546 3561 "phases.ml" 97 3546 3562
+)
+"phases.ml" 97 3546 3580 "phases.ml" 97 3546 3603
+type(
+  string
+)
+"phases.ml" 97 3546 3573 "phases.ml" 97 3546 3603
+type(
+  exn
+)
+"phases.ml" 97 3546 3572 "phases.ml" 97 3546 3604
+type(
+  exn list
+)
+"phases.ml" 97 3546 3606 "phases.ml" 97 3546 3611
+type(
+  phase list
+)
+ident(
+  int_ref trace "phases.ml" 92 3421 3437 "phases.ml" 92 3421 3442
+)
+"phases.ml" 97 3546 3571 "phases.ml" 97 3546 3612
+type(
+  failure
+)
+"phases.ml" 97 3546 3566 "phases.ml" 97 3546 3612
+type(
+  'b pipeline
+)
+"phases.ml" 98 3613 3620 "phases.ml" 98 3613 3623
+type(
+  exn
+)
+ident(
+  def err "phases.ml" 98 3613 3627 "phases.ml" 98 3613 3705
+)
+"phases.ml" 98 3613 3642 "phases.ml" 98 3613 3670
+type(
+  string
+)
+"phases.ml" 98 3613 3671 "phases.ml" 98 3613 3672
+type(
+  string -> string -> string
+)
+ident(
+  int_ref Stdlib.( ^ ) "stdlib.mli" 699 26389 26389 "stdlib.mli" 699 26389 26427
+)
+"phases.ml" 98 3613 3673 "phases.ml" 98 3613 3691
+type(
+  exn -> string
+)
+ident(
+  int_ref Stdlib.Printexc.to_string "printexc.mli" 21 1213 1213 "printexc.mli" 21 1213 1241
+)
+"phases.ml" 98 3613 3692 "phases.ml" 98 3613 3695
+type(
+  exn
+)
+ident(
+  int_ref err "phases.ml" 98 3613 3620 "phases.ml" 98 3613 3623
+)
+"phases.ml" 98 3613 3673 "phases.ml" 98 3613 3695
+type(
+  string
+)
+"phases.ml" 98 3613 3641 "phases.ml" 98 3613 3696
+type(
+  string
+)
+"phases.ml" 98 3613 3634 "phases.ml" 98 3613 3696
+type(
+  exn
+)
+"phases.ml" 98 3613 3633 "phases.ml" 98 3613 3697
+type(
+  exn list
+)
+"phases.ml" 98 3613 3699 "phases.ml" 98 3613 3704
+type(
+  phase list
+)
+ident(
+  int_ref trace "phases.ml" 92 3421 3437 "phases.ml" 92 3421 3442
+)
+"phases.ml" 98 3613 3632 "phases.ml" 98 3613 3705
+type(
+  failure
+)
+"phases.ml" 98 3613 3627 "phases.ml" 98 3613 3705
+type(
+  'b pipeline
+)
+"phases.ml" 93 3447 3452 "phases.ml" 98 3613 3705
+type(
+  'b pipeline
+)
+"phases.ml" 90 3351 3353 "phases.ml" 98 3613 3705
+type(
+  'b pipeline
+)
+"phases.ml" 101 3710 3714 "phases.ml" 101 3710 3725
+type(
+  'a pipeline -> 'a pipeline
+)
+ident(
+  def no_op_phase "phases.ml" 105 3838 3838 "phases.ml" 0 0 -1
+)
+"phases.ml" 101 3710 3727 "phases.ml" 101 3710 3739
+type(
+  'a pipeline
+)
+type(
+  'a pipeline
+)
+ident(
+  def cur_pipeline "phases.ml" 101 3710 3757 "phases.ml" 101 3710 3769
+)
+"phases.ml" 101 3710 3757 "phases.ml" 101 3710 3769
+type(
+  'a pipeline
+)
+ident(
+  int_ref cur_pipeline "phases.ml" 101 3710 3727 "phases.ml" 101 3710 3739
+)
+"phases.ml" 105 3838 3842 "phases.ml" 105 3838 3853
+type(
+  phase list -> string list
+)
+ident(
+  def print_trace "phases.ml" 138 5032 5139 "phases.ml" 0 0 -1
+)
+"phases.ml" 105 3838 3855 "phases.ml" 105 3838 3860
+type(
+  phase list
+)
+type(
+  phase list
+)
+ident(
+  def trace "phases.ml" 106 3891 3893 "phases.ml" 138 5032 5139
+)
+"phases.ml" 106 3891 3897 "phases.ml" 106 3891 3907
+type(
+  phase -> string
+)
+ident(
+  def phase_name "phases.ml" 117 4231 4233 "phases.ml" 138 5032 5139
+)
+"phases.ml" 106 3891 3908 "phases.ml" 106 3891 3909
+type(
+  phase
+)
+ident(
+  def p "phases.ml" 106 3891 3912 "phases.ml" 116 4201 4227
+)
+"phases.ml" 106 3891 3918 "phases.ml" 106 3891 3919
+type(
+  phase
+)
+ident(
+  int_ref p "phases.ml" 106 3891 3908 "phases.ml" 106 3891 3909
+)
+"phases.ml" 107 3925 3938 "phases.ml" 107 3925 3939
+type(
+  string
+)
+"phases.ml" 107 3925 3931 "phases.ml" 107 3925 3939
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 107 3925 3943 "phases.ml" 107 3925 3951
+type(
+  string
+)
+"phases.ml" 108 3952 3965 "phases.ml" 108 3952 3966
+type(
+  Exprs.sourcespan Exprs.program
+)
+"phases.ml" 108 3952 3958 "phases.ml" 108 3952 3966
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 108 3952 3970 "phases.ml" 108 3952 3978
+type(
+  string
+)
+"phases.ml" 109 3979 3996 "phases.ml" 109 3979 3997
+type(
+  Exprs.sourcespan Exprs.program
+)
+"phases.ml" 109 3979 3985 "phases.ml" 109 3979 3997
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 109 3979 4001 "phases.ml" 109 3979 4014
+type(
+  string
+)
+"phases.ml" 110 4015 4030 "phases.ml" 110 4015 4031
+type(
+  Exprs.tag Exprs.program
+)
+"phases.ml" 110 4015 4021 "phases.ml" 110 4015 4031
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 110 4015 4035 "phases.ml" 110 4015 4044
+type(
+  string
+)
+"phases.ml" 111 4045 4061 "phases.ml" 111 4045 4062
+type(
+  Exprs.sourcespan Exprs.program
+)
+"phases.ml" 111 4045 4051 "phases.ml" 111 4045 4062
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 111 4045 4066 "phases.ml" 111 4045 4077
+type(
+  string
+)
+"phases.ml" 112 4078 4097 "phases.ml" 112 4078 4098
+type(
+  Exprs.sourcespan Exprs.program
+)
+"phases.ml" 112 4078 4084 "phases.ml" 112 4078 4098
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 112 4078 4102 "phases.ml" 112 4078 4117
+type(
+  string
+)
+"phases.ml" 113 4118 4131 "phases.ml" 113 4118 4132
+type(
+  Exprs.tag Exprs.program
+)
+"phases.ml" 113 4118 4124 "phases.ml" 113 4118 4132
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 113 4118 4136 "phases.ml" 113 4118 4144
+type(
+  string
+)
+"phases.ml" 114 4145 4157 "phases.ml" 114 4145 4158
+type(
+  Exprs.tag Exprs.aprogram
+)
+"phases.ml" 114 4145 4151 "phases.ml" 114 4145 4158
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 114 4145 4162 "phases.ml" 114 4145 4170
+type(
+  string
+)
+"phases.ml" 115 4171 4185 "phases.ml" 115 4171 4186
+type(
+  Assembly.arg name_envt name_envt
+)
+type(
+  Exprs.tag Exprs.aprogram
+)
+"phases.ml" 115 4171 4177 "phases.ml" 115 4171 4186
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 115 4171 4191 "phases.ml" 115 4171 4200
+type(
+  string
+)
+"phases.ml" 116 4201 4214 "phases.ml" 116 4201 4215
+type(
+  string
+)
+"phases.ml" 116 4201 4207 "phases.ml" 116 4201 4215
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 116 4201 4219 "phases.ml" 116 4201 4227
+type(
+  string
+)
+"phases.ml" 106 3891 3912 "phases.ml" 116 4201 4227
+type(
+  string
+)
+"phases.ml" 117 4231 4237 "phases.ml" 117 4231 4252
+type(
+  phase -> string
+)
+ident(
+  def string_of_phase "phases.ml" 138 5032 5034 "phases.ml" 138 5032 5139
+)
+"phases.ml" 117 4231 4253 "phases.ml" 117 4231 4254
+type(
+  phase
+)
+ident(
+  def p "phases.ml" 117 4231 4257 "phases.ml" 137 5009 5028
+)
+"phases.ml" 117 4231 4263 "phases.ml" 117 4231 4264
+type(
+  phase
+)
+ident(
+  int_ref p "phases.ml" 117 4231 4253 "phases.ml" 117 4231 4254
+)
+"phases.ml" 118 4270 4283 "phases.ml" 118 4270 4284
+type(
+  string
+)
+ident(
+  def s "phases.ml" 118 4270 4288 "phases.ml" 118 4270 4289
+)
+"phases.ml" 118 4270 4276 "phases.ml" 118 4270 4284
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 118 4270 4288 "phases.ml" 118 4270 4289
+type(
+  string
+)
+ident(
+  int_ref s "phases.ml" 118 4270 4283 "phases.ml" 118 4270 4284
+)
+"phases.ml" 119 4290 4303 "phases.ml" 119 4290 4304
+type(
+  Exprs.sourcespan Exprs.program
+)
+ident(
+  def p "phases.ml" 120 4305 4327 "phases.ml" 120 4305 4346
+)
+"phases.ml" 119 4290 4296 "phases.ml" 119 4290 4304
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 120 4305 4322 "phases.ml" 120 4305 4323
+type(
+  Exprs.sourcespan Exprs.program
+)
+ident(
+  def p "phases.ml" 120 4305 4327 "phases.ml" 120 4305 4346
+)
+"phases.ml" 120 4305 4311 "phases.ml" 120 4305 4323
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 119 4290 4296 "phases.ml" 120 4305 4323
+type(
+  phase
+)
+"phases.ml" 120 4305 4327 "phases.ml" 120 4305 4344
+type(
+  Exprs.sourcespan Exprs.program -> string
+)
+ident(
+  int_ref Pretty.string_of_program "pretty.ml" 166 5305 5309 "pretty.ml" 166 5305 5326
+)
+"phases.ml" 120 4305 4345 "phases.ml" 120 4305 4346
+type(
+  Exprs.sourcespan Exprs.program
+)
+ident(
+  int_ref p "phases.ml" 119 4290 4303 "phases.ml" 119 4290 4304
+)
+"phases.ml" 120 4305 4327 "phases.ml" 120 4305 4346
+type(
+  string
+)
+"phases.ml" 121 4347 4361 "phases.ml" 121 4347 4362
+type(
+  Exprs.tag Exprs.program
+)
+ident(
+  def p "phases.ml" 121 4347 4366 "phases.ml" 121 4347 4385
+)
+"phases.ml" 121 4347 4353 "phases.ml" 121 4347 4362
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 121 4347 4366 "phases.ml" 121 4347 4383
+type(
+  Exprs.tag Exprs.program -> string
+)
+ident(
+  int_ref Pretty.string_of_program "pretty.ml" 166 5305 5309 "pretty.ml" 166 5305 5326
+)
+"phases.ml" 121 4347 4384 "phases.ml" 121 4347 4385
+type(
+  Exprs.tag Exprs.program
+)
+ident(
+  int_ref p "phases.ml" 121 4347 4361 "phases.ml" 121 4347 4362
+)
+"phases.ml" 121 4347 4366 "phases.ml" 121 4347 4385
+type(
+  string
+)
+"phases.ml" 122 4386 4402 "phases.ml" 122 4386 4403
+type(
+  Exprs.sourcespan Exprs.program
+)
+ident(
+  def p "phases.ml" 122 4386 4407 "phases.ml" 122 4386 4426
+)
+"phases.ml" 122 4386 4392 "phases.ml" 122 4386 4403
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 122 4386 4407 "phases.ml" 122 4386 4424
+type(
+  Exprs.sourcespan Exprs.program -> string
+)
+ident(
+  int_ref Pretty.string_of_program "pretty.ml" 166 5305 5309 "pretty.ml" 166 5305 5326
+)
+"phases.ml" 122 4386 4425 "phases.ml" 122 4386 4426
+type(
+  Exprs.sourcespan Exprs.program
+)
+ident(
+  int_ref p "phases.ml" 122 4386 4402 "phases.ml" 122 4386 4403
+)
+"phases.ml" 122 4386 4407 "phases.ml" 122 4386 4426
+type(
+  string
+)
+"phases.ml" 123 4427 4446 "phases.ml" 123 4427 4447
+type(
+  Exprs.sourcespan Exprs.program
+)
+ident(
+  def p "phases.ml" 123 4427 4451 "phases.ml" 123 4427 4470
+)
+"phases.ml" 123 4427 4433 "phases.ml" 123 4427 4447
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 123 4427 4451 "phases.ml" 123 4427 4468
+type(
+  Exprs.sourcespan Exprs.program -> string
+)
+ident(
+  int_ref Pretty.string_of_program "pretty.ml" 166 5305 5309 "pretty.ml" 166 5305 5326
+)
+"phases.ml" 123 4427 4469 "phases.ml" 123 4427 4470
+type(
+  Exprs.sourcespan Exprs.program
+)
+ident(
+  int_ref p "phases.ml" 123 4427 4446 "phases.ml" 123 4427 4447
+)
+"phases.ml" 123 4427 4451 "phases.ml" 123 4427 4470
+type(
+  string
+)
+"phases.ml" 124 4471 4484 "phases.ml" 124 4471 4485
+type(
+  Exprs.tag Exprs.program
+)
+ident(
+  def p "phases.ml" 124 4471 4489 "phases.ml" 124 4471 4549
+)
+"phases.ml" 124 4471 4477 "phases.ml" 124 4471 4485
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 124 4471 4489 "phases.ml" 124 4471 4511
+type(
+  int -> (Exprs.tag -> string) -> Exprs.tag Exprs.program -> string
+)
+ident(
+  int_ref Pretty.string_of_program_with "pretty.ml" 153 4883 4887 "pretty.ml" 153 4883 4909
+)
+"phases.ml" 124 4471 4512 "phases.ml" 124 4471 4516
+type(
+  int
+)
+"phases.ml" 124 4471 4522 "phases.ml" 124 4471 4525
+type(
+  Exprs.tag
+)
+ident(
+  def tag "phases.ml" 124 4471 4529 "phases.ml" 124 4471 4546
+)
+"phases.ml" 124 4471 4529 "phases.ml" 124 4471 4536
+type(
+  (Exprs.tag -> string, unit, string) format -> Exprs.tag -> string
+)
+ident(
+  int_ref Stdlib.Printf.sprintf "printf.mli" 135 7108 7108 "printf.mli" 135 7108 7153
+)
+"phases.ml" 124 4471 4537 "phases.ml" 124 4471 4542
+type(
+  (Exprs.tag -> string, unit, string) format
+)
+"phases.ml" 124 4471 4543 "phases.ml" 124 4471 4546
+type(
+  Exprs.tag
+)
+ident(
+  int_ref tag "phases.ml" 124 4471 4522 "phases.ml" 124 4471 4525
+)
+"phases.ml" 124 4471 4529 "phases.ml" 124 4471 4546
+type(
+  string
+)
+"phases.ml" 124 4471 4517 "phases.ml" 124 4471 4547
+type(
+  Exprs.tag -> string
+)
+"phases.ml" 124 4471 4548 "phases.ml" 124 4471 4549
+type(
+  Exprs.tag Exprs.program
+)
+ident(
+  int_ref p "phases.ml" 124 4471 4484 "phases.ml" 124 4471 4485
+)
+"phases.ml" 124 4471 4489 "phases.ml" 124 4471 4549
+type(
+  string
+)
+"phases.ml" 125 4550 4562 "phases.ml" 125 4550 4563
+type(
+  Exprs.tag Exprs.aprogram
+)
+ident(
+  def p "phases.ml" 125 4550 4567 "phases.ml" 125 4550 4629
+)
+"phases.ml" 125 4550 4556 "phases.ml" 125 4550 4563
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 125 4550 4567 "phases.ml" 125 4550 4590
+type(
+  int -> (Exprs.tag -> string) -> Exprs.tag Exprs.aprogram -> string
+)
+ident(
+  int_ref Pretty.string_of_aprogram_with "pretty.ml" 244 8451 8455 "pretty.ml" 244 8451 8478
+)
+"phases.ml" 125 4550 4591 "phases.ml" 125 4550 4595
+type(
+  int
+)
+"phases.ml" 125 4550 4601 "phases.ml" 125 4550 4604
+type(
+  Exprs.tag
+)
+ident(
+  def tag "phases.ml" 125 4550 4608 "phases.ml" 125 4550 4625
+)
+"phases.ml" 125 4550 4608 "phases.ml" 125 4550 4615
+type(
+  (Exprs.tag -> string, unit, string) format -> Exprs.tag -> string
+)
+ident(
+  int_ref Stdlib.Printf.sprintf "printf.mli" 135 7108 7108 "printf.mli" 135 7108 7153
+)
+"phases.ml" 125 4550 4616 "phases.ml" 125 4550 4621
+type(
+  (Exprs.tag -> string, unit, string) format
+)
+"phases.ml" 125 4550 4622 "phases.ml" 125 4550 4625
+type(
+  Exprs.tag
+)
+ident(
+  int_ref tag "phases.ml" 125 4550 4601 "phases.ml" 125 4550 4604
+)
+"phases.ml" 125 4550 4608 "phases.ml" 125 4550 4625
+type(
+  string
+)
+"phases.ml" 125 4550 4596 "phases.ml" 125 4550 4626
+type(
+  Exprs.tag -> string
+)
+"phases.ml" 125 4550 4628 "phases.ml" 125 4550 4629
+type(
+  Exprs.tag Exprs.aprogram
+)
+ident(
+  int_ref p "phases.ml" 125 4550 4562 "phases.ml" 125 4550 4563
+)
+"phases.ml" 125 4550 4567 "phases.ml" 125 4550 4629
+type(
+  string
+)
+"phases.ml" 126 4630 4644 "phases.ml" 126 4630 4645
+type(
+  Exprs.tag Exprs.aprogram
+)
+ident(
+  def p "phases.ml" 127 4653 4659 "phases.ml" 136 4922 5008
+)
+"phases.ml" 126 4630 4647 "phases.ml" 126 4630 4648
+type(
+  Assembly.arg name_envt name_envt
+)
+ident(
+  def e "phases.ml" 127 4653 4659 "phases.ml" 136 4922 5008
+)
+"phases.ml" 126 4630 4636 "phases.ml" 126 4630 4649
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 127 4653 4659 "phases.ml" 127 4653 4682
+type(
+  int -> (Exprs.tag -> string) -> Exprs.tag Exprs.aprogram -> string
+)
+ident(
+  int_ref Pretty.string_of_aprogram_with "pretty.ml" 244 8451 8455 "pretty.ml" 244 8451 8478
+)
+"phases.ml" 127 4653 4683 "phases.ml" 127 4653 4687
+type(
+  int
+)
+"phases.ml" 127 4653 4693 "phases.ml" 127 4653 4696
+type(
+  Exprs.tag
+)
+ident(
+  def tag "phases.ml" 127 4653 4700 "phases.ml" 127 4653 4717
+)
+"phases.ml" 127 4653 4700 "phases.ml" 127 4653 4707
+type(
+  (Exprs.tag -> string, unit, string) format -> Exprs.tag -> string
+)
+ident(
+  int_ref Stdlib.Printf.sprintf "printf.mli" 135 7108 7108 "printf.mli" 135 7108 7153
+)
+"phases.ml" 127 4653 4708 "phases.ml" 127 4653 4713
+type(
+  (Exprs.tag -> string, unit, string) format
+)
+"phases.ml" 127 4653 4714 "phases.ml" 127 4653 4717
+type(
+  Exprs.tag
+)
+ident(
+  int_ref tag "phases.ml" 127 4653 4693 "phases.ml" 127 4653 4696
+)
+"phases.ml" 127 4653 4700 "phases.ml" 127 4653 4717
+type(
+  string
+)
+"phases.ml" 127 4653 4688 "phases.ml" 127 4653 4718
+type(
+  Exprs.tag -> string
+)
+"phases.ml" 127 4653 4719 "phases.ml" 127 4653 4720
+type(
+  Exprs.tag Exprs.aprogram
+)
+ident(
+  int_ref p "phases.ml" 126 4630 4644 "phases.ml" 126 4630 4645
+)
+"phases.ml" 127 4653 4659 "phases.ml" 127 4653 4720
+type(
+  string
+)
+"phases.ml" 128 4721 4727 "phases.ml" 128 4721 4728
+type(
+  string -> string -> string
+)
+ident(
+  int_ref Stdlib.( ^ ) "stdlib.mli" 699 26389 26389 "stdlib.mli" 699 26389 26427
+)
+"phases.ml" 128 4721 4729 "phases.ml" 128 4721 4740
+type(
+  string
+)
+"phases.ml" 129 4741 4747 "phases.ml" 129 4741 4748
+type(
+  string -> string -> string
+)
+ident(
+  int_ref Stdlib.( ^ ) "stdlib.mli" 699 26389 26389 "stdlib.mli" 699 26389 26427
+)
+"phases.ml" 129 4741 4749 "phases.ml" 129 4741 4770
+type(
+  string -> string list -> string
+)
+ident(
+  int_ref ExtString.String.join "src/extString.mli" 58 2183 2185 "src/extString.mli" 58 2183 2227
+)
+"phases.ml" 129 4741 4771 "phases.ml" 129 4741 4775
+type(
+  string
+)
+"phases.ml" 130 4776 4785 "phases.ml" 130 4776 4793
+type(
+  (string * Assembly.arg name_envt -> string) ->
+  Assembly.arg name_envt name_envt -> string list
+)
+ident(
+  int_ref Stdlib.List.map "list.mli" 172 6124 6124 "list.mli" 172 6124 6166
+)
+"phases.ml" 131 4794 4810 "phases.ml" 131 4794 4814
+type(
+  string
+)
+ident(
+  def name "phases.ml" 132 4824 4836 "phases.ml" 136 4922 5004
+)
+"phases.ml" 131 4794 4816 "phases.ml" 131 4794 4819
+type(
+  Assembly.arg name_envt
+)
+ident(
+  def env "phases.ml" 132 4824 4836 "phases.ml" 136 4922 5004
+)
+"phases.ml" 131 4794 4809 "phases.ml" 131 4794 4820
+type(
+  string * Assembly.arg name_envt
+)
+"phases.ml" 132 4824 4836 "phases.ml" 132 4824 4840
+type(
+  string
+)
+ident(
+  int_ref name "phases.ml" 131 4794 4810 "phases.ml" 131 4794 4814
+)
+"phases.ml" 133 4841 4853 "phases.ml" 133 4841 4854
+type(
+  string -> string -> string
+)
+ident(
+  int_ref Stdlib.( ^ ) "stdlib.mli" 699 26389 26389 "stdlib.mli" 699 26389 26427
+)
+"phases.ml" 133 4841 4855 "phases.ml" 133 4841 4862
+type(
+  string
+)
+"phases.ml" 134 4863 4875 "phases.ml" 134 4863 4876
+type(
+  string -> string -> string
+)
+ident(
+  int_ref Stdlib.( ^ ) "stdlib.mli" 699 26389 26389 "stdlib.mli" 699 26389 26427
+)
+"phases.ml" 134 4863 4878 "phases.ml" 134 4863 4899
+type(
+  string -> string list -> string
+)
+ident(
+  int_ref ExtString.String.join "src/extString.mli" 58 2183 2185 "src/extString.mli" 58 2183 2227
+)
+"phases.ml" 135 4900 4915 "phases.ml" 135 4900 4921
+type(
+  string
+)
+"phases.ml" 136 4922 4938 "phases.ml" 136 4922 4946
+type(
+  (string * Assembly.arg -> string) -> Assembly.arg name_envt -> string list
+)
+ident(
+  int_ref Stdlib.List.map "list.mli" 172 6124 6124 "list.mli" 172 6124 6166
+)
+"phases.ml" 136 4922 4953 "phases.ml" 136 4922 4957
+type(
+  string
+)
+ident(
+  def name "phases.ml" 136 4922 4967 "phases.ml" 136 4922 4997
+)
+"phases.ml" 136 4922 4959 "phases.ml" 136 4922 4962
+type(
+  Assembly.arg
+)
+ident(
+  def arg "phases.ml" 136 4922 4967 "phases.ml" 136 4922 4997
+)
+"phases.ml" 136 4922 4952 "phases.ml" 136 4922 4963
+type(
+  string * Assembly.arg
+)
+"phases.ml" 136 4922 4967 "phases.ml" 136 4922 4971
+type(
+  string
+)
+ident(
+  int_ref name "phases.ml" 136 4922 4953 "phases.ml" 136 4922 4957
+)
+"phases.ml" 136 4922 4972 "phases.ml" 136 4922 4973
+type(
+  string -> string -> string
+)
+ident(
+  int_ref Stdlib.( ^ ) "stdlib.mli" 699 26389 26389 "stdlib.mli" 699 26389 26427
+)
+"phases.ml" 136 4922 4974 "phases.ml" 136 4922 4978
+type(
+  string
+)
+"phases.ml" 136 4922 4979 "phases.ml" 136 4922 4980
+type(
+  string -> string -> string
+)
+ident(
+  int_ref Stdlib.( ^ ) "stdlib.mli" 699 26389 26389 "stdlib.mli" 699 26389 26427
+)
+"phases.ml" 136 4922 4982 "phases.ml" 136 4922 4992
+type(
+  Assembly.arg -> string
+)
+ident(
+  int_ref Assembly.arg_to_asm "assembly.ml" 88 1479 1487 "assembly.ml" 88 1479 1497
+)
+"phases.ml" 136 4922 4993 "phases.ml" 136 4922 4996
+type(
+  Assembly.arg
+)
+ident(
+  int_ref arg "phases.ml" 136 4922 4959 "phases.ml" 136 4922 4962
+)
+"phases.ml" 136 4922 4981 "phases.ml" 136 4922 4997
+type(
+  string
+)
+"phases.ml" 136 4922 4974 "phases.ml" 136 4922 4997
+type(
+  string
+)
+"phases.ml" 136 4922 4967 "phases.ml" 136 4922 4997
+type(
+  string
+)
+"phases.ml" 136 4922 4947 "phases.ml" 136 4922 4998
+type(
+  string * Assembly.arg -> string
+)
+"phases.ml" 136 4922 4999 "phases.ml" 136 4922 5002
+type(
+  Assembly.arg name_envt
+)
+ident(
+  int_ref env "phases.ml" 131 4794 4816 "phases.ml" 131 4794 4819
+)
+"phases.ml" 136 4922 4937 "phases.ml" 136 4922 5003
+type(
+  string list
+)
+"phases.ml" 134 4863 4877 "phases.ml" 136 4922 5004
+type(
+  string
+)
+"phases.ml" 133 4841 4855 "phases.ml" 136 4922 5004
+type(
+  string
+)
+"phases.ml" 132 4824 4836 "phases.ml" 136 4922 5004
+type(
+  string
+)
+"phases.ml" 131 4794 4804 "phases.ml" 136 4922 5005
+type(
+  string * Assembly.arg name_envt -> string
+)
+"phases.ml" 136 4922 5006 "phases.ml" 136 4922 5007
+type(
+  Assembly.arg name_envt name_envt
+)
+ident(
+  int_ref e "phases.ml" 126 4630 4647 "phases.ml" 126 4630 4648
+)
+"phases.ml" 130 4776 4784 "phases.ml" 136 4922 5008
+type(
+  string list
+)
+"phases.ml" 129 4741 4749 "phases.ml" 136 4922 5008
+type(
+  string
+)
+"phases.ml" 128 4721 4729 "phases.ml" 136 4922 5008
+type(
+  string
+)
+"phases.ml" 127 4653 4659 "phases.ml" 136 4922 5008
+type(
+  string
+)
+"phases.ml" 137 5009 5022 "phases.ml" 137 5009 5023
+type(
+  string
+)
+ident(
+  def s "phases.ml" 137 5009 5027 "phases.ml" 137 5009 5028
+)
+"phases.ml" 137 5009 5015 "phases.ml" 137 5009 5023
+type(
+  phase
+)
+type(
+  phase
+)
+"phases.ml" 137 5009 5027 "phases.ml" 137 5009 5028
+type(
+  string
+)
+ident(
+  int_ref s "phases.ml" 137 5009 5022 "phases.ml" 137 5009 5023
+)
+"phases.ml" 117 4231 4257 "phases.ml" 137 5009 5028
+type(
+  string
+)
+"phases.ml" 138 5032 5034 "phases.ml" 138 5032 5043
+type(
+  (int -> phase -> string) -> phase list -> string list
+)
+ident(
+  int_ref Stdlib.List.mapi "list.mli" 178 6337 6337 "list.mli" 178 6337 6387
+)
+"phases.ml" 138 5032 5049 "phases.ml" 138 5032 5050
+type(
+  int
+)
+ident(
+  def n "phases.ml" 138 5032 5051 "phases.ml" 138 5032 5121
+)
+"phases.ml" 138 5032 5051 "phases.ml" 138 5032 5052
+type(
+  phase
+)
+ident(
+  def p "phases.ml" 138 5032 5056 "phases.ml" 138 5032 5121
+)
+"phases.ml" 138 5032 5056 "phases.ml" 138 5032 5063
+type(
+  (int -> string -> string -> string, unit, string) format ->
+  int -> string -> string -> string
+)
+ident(
+  int_ref Stdlib.Printf.sprintf "printf.mli" 135 7108 7108 "printf.mli" 135 7108 7153
+)
+"phases.ml" 138 5032 5064 "phases.ml" 138 5032 5084
+type(
+  (int -> string -> string -> string, unit, string) format
+)
+"phases.ml" 138 5032 5085 "phases.ml" 138 5032 5086
+type(
+  int
+)
+ident(
+  int_ref n "phases.ml" 138 5032 5049 "phases.ml" 138 5032 5050
+)
+"phases.ml" 138 5032 5088 "phases.ml" 138 5032 5098
+type(
+  phase -> string
+)
+ident(
+  int_ref phase_name "phases.ml" 106 3891 3897 "phases.ml" 106 3891 3907
+)
+"phases.ml" 138 5032 5099 "phases.ml" 138 5032 5100
+type(
+  phase
+)
+ident(
+  int_ref p "phases.ml" 138 5032 5051 "phases.ml" 138 5032 5052
+)
+"phases.ml" 138 5032 5087 "phases.ml" 138 5032 5101
+type(
+  string
+)
+"phases.ml" 138 5032 5103 "phases.ml" 138 5032 5118
+type(
+  phase -> string
+)
+ident(
+  int_ref string_of_phase "phases.ml" 117 4231 4237 "phases.ml" 117 4231 4252
+)
+"phases.ml" 138 5032 5119 "phases.ml" 138 5032 5120
+type(
+  phase
+)
+ident(
+  int_ref p "phases.ml" 138 5032 5051 "phases.ml" 138 5032 5052
+)
+"phases.ml" 138 5032 5102 "phases.ml" 138 5032 5121
+type(
+  string
+)
+"phases.ml" 138 5032 5056 "phases.ml" 138 5032 5121
+type(
+  string
+)
+"phases.ml" 138 5032 5044 "phases.ml" 138 5032 5122
+type(
+  int -> phase -> string
+)
+"phases.ml" 138 5032 5124 "phases.ml" 138 5032 5132
+type(
+  phase list -> phase list
+)
+ident(
+  int_ref Stdlib.List.rev "list.mli" 90 3519 3519 "list.mli" 90 3519 3547
+)
+"phases.ml" 138 5032 5133 "phases.ml" 138 5032 5138
+type(
+  phase list
+)
+ident(
+  int_ref trace "phases.ml" 105 3838 3855 "phases.ml" 105 3838 3860
+)
+"phases.ml" 138 5032 5123 "phases.ml" 138 5032 5139
+type(
+  phase list
+)
+"phases.ml" 138 5032 5034 "phases.ml" 138 5032 5139
+type(
+  string list
+)
+"phases.ml" 117 4231 4233 "phases.ml" 138 5032 5139
+type(
+  string list
+)
+"phases.ml" 106 3891 3893 "phases.ml" 138 5032 5139
+type(
+  string list
+)

@@ -1,0 +1,8 @@
+let x = 5 in
+	if x == x:
+		if x == 5:
+			print(1)
+		else:
+			print(2)
+	else:
+		2

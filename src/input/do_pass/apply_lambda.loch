@@ -1,0 +1,5 @@
+def apply(l):
+	l(5)
+
+let a = (lambda(x): x + 1), b = (lambda(y): y + 2) in
+	apply(a) + apply(b)

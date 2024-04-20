@@ -1,0 +1,5 @@
+def f(x):
+	x + 1
+
+let x = 3 in
+	f(x)

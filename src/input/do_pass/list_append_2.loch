@@ -1,0 +1,13 @@
+def link(a, b):
+	(a, b)
+
+def append(l1, l2):
+	if l1 == nil: l2
+	else:
+		let (h, t) = l1 in
+			link(h, append(t, l2))
+	
+
+let l1 = link(1, link(2, nil)) in
+	let l2 = link(true, link(false, l1)) in
+		append(l1, l2)

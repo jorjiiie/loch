@@ -1,0 +1,6 @@
+def make_thunk(x):
+    (lambda : x * 2)
+
+let l = (1,2,3) in
+    let a = make_thunk(l[0]), b = make_thunk(l[1]), c = make_thunk(l[2]) in
+        print(c()); print(b()); print(a())

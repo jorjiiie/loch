@@ -1,0 +1,9 @@
+def x(a):
+    a+69
+def mx(a, b):
+    if a > b: a else: b
+def fib(n):
+    if n < 2: n else: (fib(n - 1) + fib(n - 2))
+
+let y = 1 in
+    print(mx(fib(15), x(1)))
