@@ -20,11 +20,11 @@ void tcb_runner(tcb_t *tcb, uint64_t arg) {
 // i think this all should be in loch
 
 tcb_t *tcb_create(uint64_t closure_ptr) {
-  printd("making closure with %llu", closure_ptr);
+  printd("making closure with %d", closure_ptr);
   tcb_t *tcb = (tcb_t *)malloc(sizeof(tcb_t));
   tcb->closure_ptr = closure_ptr;
   tcb->result = 0;
-  atomic_store(&tcb->state, NOT_RUNNING);
+  atomic_init(&tcb->state, NOT_RUNNING);
 
   getcontext(&tcb->ctx);
   tcb->ctx.uc_stack.ss_sp = mmap(NULL, LOCH_STACK_SIZE, PROT_READ | PROT_WRITE,

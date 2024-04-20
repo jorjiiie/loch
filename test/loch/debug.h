@@ -9,6 +9,9 @@
 #define DEBUG_LOG 1
 #endif // !DEBUG
 
+#include <assert.h>
+#include <stdio.h>
+
 // oh i love my debug macros
 #define printd(fmt, ...)                                                       \
   do {                                                                         \

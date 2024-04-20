@@ -14,8 +14,9 @@
 // number of system threads to utilize (excluding main thread)
 #define LOCH_THREADS 2
 
-#include "sched.h"
-#include "tcb.h"
+#include <stdint.h>
+#include <ucontext.h>
+typedef struct tcb tcb_t;
 
 // each thread should have a _Thread_local of these
 typedef struct thread_state {
@@ -26,10 +27,21 @@ typedef struct thread_state {
 
 } thread_state_t;
 
+// calls into threads_start_here function with the heap pointer,
+// and this as args
+void tcb_runner(tcb_t *tcb, uint64_t arg);
+
+// sets the stack bottom of the tcb
+// first thing called by thread_code_starts_here
+uint64_t tcb_set_stack_bottom(uint64_t *stack_bottom);
+
 // yield must provide the gc parameters to the scheduler so
 // we can set it
 // this MUST be called from loch (obviously)
-void yield(uint64_t *rbp, uint64_t *rsp);
+void loch_yield(uint64_t *rbp, uint64_t *rsp);
+
+// yield from inside the runtime (main yield)
+void runtime_yield();
 
 // schedules the next thread - this may need some care lol
 // called from C for various reasons (blocking sleep/get)
