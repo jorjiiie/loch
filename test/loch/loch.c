@@ -2,8 +2,10 @@
 #define _XOPEN_SOURCE
 
 #include "loch.h"
-#include "loch.H"
 #include "sched.h"
+
+// pass it as a compile flag -DDEBUG_LOG
+#include "debug.h"
 
 #include <unistd.h>
 
@@ -17,6 +19,8 @@ sched_t *scheduler;
 
 _Atomic uint64_t thread_id;
 // maybe have a big ass table of tcb_t (loch_int -> tcb_t)
+
+// maybe this should return R15
 void yield(uint64_t *rbp, uint64_t *rsp) {
 
   state.current_context->frame_bottom = rbp;
@@ -36,7 +40,8 @@ void yield(uint64_t *rbp, uint64_t *rsp) {
 
   // enter waiting state
   if (state.next_context == NULL) {
-    atomic_fetch_sub(&active_threads, 1);
+    // maybe not do this (depends on how you go in and out)
+    // atomic_fetch_sub(&active_threads, 1);
     state.current_context = NULL;
     setcontext(&state.wait_ctx);
   }
@@ -77,12 +82,16 @@ void check_for_work() {
     if (tcb == NULL)
       usleep(10);
     else {
-      atomic_fetch_add(&active_threads, 1);
       atomic_store(&tcb->state, RUNNING);
       state.current_context = tcb;
-      setcontext(&tcb->ctx);
+
+      atomic_fetch_add(&active_threads, 1);
+      swapcontext(&state.wait_ctx, &tcb->ctx);
+      atomic_fetch_sub(&active_threads, 1);
     }
   }
 }
+
+void thread_func() {}
 
 #endif

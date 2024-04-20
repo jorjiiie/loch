@@ -12,8 +12,15 @@
 
 extern uint64_t *heap_ptr;
 extern uint64_t *heap_end;
+extern uint64_t HEAP_SIZE;
+
+extern uint64_t
+thread_code_starts_here(uint64_t *heap, uint64_t sz,
+                        uint64_t closure) asm("thread_code_starts_here");
 
 typedef enum { NOT_RUNNING, RUNNING, FINISHED } tcb_state_t;
+
+#define LOCH_STACK_SIZE (1 << 20)
 
 typedef struct tcb {
   // scheduler info

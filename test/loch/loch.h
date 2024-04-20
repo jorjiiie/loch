@@ -11,10 +11,13 @@
 #define _XOPEN_SOURCE
 #endif
 
+// number of system threads to utilize (excluding main thread)
+#define LOCH_THREADS 2
+
 #include "sched.h"
 #include "tcb.h"
 
-// each thread should have a _Thread_local object here
+// each thread should have a _Thread_local of these
 typedef struct thread_state {
   tcb_t *current_context;
   tcb_t *next_context;
@@ -41,6 +44,11 @@ uint64_t spawn_thread(uint64_t closure);
 // if TCB is not ready, we block (reschedule)
 uint64_t loch_get(uint64_t loch_tcb);
 
+// the infinite loop of checking for work ()
 void check_for_work();
+
+void thread_func();
+
+void init_threads();
 
 #endif
