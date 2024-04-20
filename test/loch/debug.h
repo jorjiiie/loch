@@ -15,10 +15,11 @@
 // oh i love my debug macros
 #define printd(fmt, ...)                                                       \
   do {                                                                         \
-    if (DEBUG_LOG)                                                             \
+    if (DEBUG_LOG) {                                                           \
       fprintf(stderr, "%s:%d:%s(): " fmt, __FILE__, __LINE__, __func__,        \
               ##__VA_ARGS__);                                                  \
-    fprintf(stderr, "\n");                                                     \
+      fprintf(stderr, "\n");                                                   \
+    }                                                                          \
   } while (0)
 
 #endif

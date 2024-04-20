@@ -26,8 +26,12 @@ tcb_t *tcb_create(uint64_t closure_ptr) {
   }
   tcb->ctx.uc_stack.ss_size = LOCH_STACK_SIZE;
   tcb->ctx.uc_link = NULL;
-  makecontext(&tcb->ctx, (void (*)(void))tcb_runner, 2, tcb, closure_ptr);
+  makecontext(&tcb->ctx,
+              (void (*)(uint32_t, uint32_t, uint32_t, uint32_t))tcb_runner, 4,
+              (uint64_t)tcb >> 32, (uint64_t)tcb & 0x00000000ffffffff,
+              closure_ptr >> 32, closure_ptr & 0x00000000ffffffff);
 
+  printf("created tcb %p\n", tcb);
   return tcb;
 }
 #endif

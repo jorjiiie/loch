@@ -12,6 +12,8 @@
 #include "loch.h"
 #include "mutex.h"
 
+#include "debug.h"
+
 mutex_t *mutex_create() {
   mutex_t *m = (mutex_t *)malloc(sizeof(mutex_t));
   atomic_init(&m->lock, 0);
@@ -40,12 +42,20 @@ spinlock_t *spinlock_create() {
 void spinlock_destroy(spinlock_t *s) { free(s); }
 
 void spinlock_lock(spinlock_t *s) {
+  // printd("locking %p!", s);
+
   uint32_t exp = 0;
   while (1) {
-    if (atomic_compare_exchange_strong(&s->lock, &exp, 1)) {
+    atomic_compare_exchange_strong(&s->lock, &exp, 1);
+    if (exp == 0) {
+      // printd("lock acquired?? %p %u", s, exp);
       return;
     }
+    // printd("failed lock!");
   }
 }
 
-void spinlock_unlock(spinlock_t *s) { atomic_store(&s->lock, 0); }
+void spinlock_unlock(spinlock_t *s) {
+  // printd("lock given up");
+  atomic_store(&s->lock, 0);
+}

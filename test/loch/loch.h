@@ -29,7 +29,8 @@ typedef struct thread_state {
 
 // calls into threads_start_here function with the heap pointer,
 // and this as args
-void tcb_runner(tcb_t *tcb, uint64_t arg);
+void tcb_runner(uint32_t tcb_high, uint32_t tcb_low, uint32_t closure_high,
+                uint32_t closure_low);
 
 // sets the stack bottom of the tcb
 // first thing called by thread_code_starts_here

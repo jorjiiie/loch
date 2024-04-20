@@ -28,18 +28,23 @@ extern uint64_t
 thread_code_starts_here(uint64_t *heap, uint64_t sz,
                         uint64_t closure) asm("thread_code_starts_here");
 
+extern uint64_t do_something(uint64_t closure);
+
 /*
  * threading stuff
  */
 extern _Atomic uint64_t active_threads;
 
-sched_t *scheduler;
+extern sched_t *scheduler;
 
-_Atomic uint64_t thread_id;
-_Thread_local thread_state_t state;
+extern _Atomic uint64_t thread_id;
+extern _Thread_local thread_state_t state;
 // table_t
 
-void tcb_runner(tcb_t *tcb, uint64_t arg) {
+void tcb_runner(uint32_t tcb_high, uint32_t tcb_low, uint32_t closure_high,
+                uint32_t closure_low) {
+  tcb_t *tcb = (tcb_t *)((uint64_t)tcb_high << 32 | tcb_low);
+  uint64_t arg = (uint64_t)closure_high << 32 | closure_low;
   // we have this block because when we swap to a fresh context, it won't run
   // this important code! bookkeeping 101
   if (state.next_context != NULL) {
@@ -52,9 +57,12 @@ void tcb_runner(tcb_t *tcb, uint64_t arg) {
     state.current_context = state.next_context;
     state.next_context = NULL;
   }
-  uint64_t ret = thread_code_starts_here(heap_ptr, HEAP_SIZE, arg);
+  printf("lol tcb? %p\n", tcb);
+  // uint64_t ret = thread_code_starts_here(heap_ptr, HEAP_SIZE, arg);
+  uint64_t ret = do_something(arg);
   tcb->result = ret;
   atomic_store(&tcb->state, FINISHED);
+  swapcontext(&tcb->ctx, &state.wait_ctx);
 }
 
 uint64_t tcb_set_stack_bottom(uint64_t *stack_bottom) {
@@ -92,8 +100,10 @@ void runtime_yield() {
   if (state.next_context == NULL)
     return;
 
+  printd("BEFORE STATE %p", &state);
   // swap to the other thread
   swapcontext(&state.current_context->ctx, &state.next_context->ctx);
+  printd("AFTER STATE %p", &state);
   // we are now in state.next_context
   atomic_store(&state.current_context->state, NOT_RUNNING);
   atomic_store(&state.next_context->state, RUNNING);
@@ -121,7 +131,7 @@ uint64_t loch_get(uint64_t loch_tcb) {
   // TODO: get the TCB somehow. I don't want to throw pointers around.
   tcb_t *tcb;
   while (atomic_load(&tcb->state) != FINISHED) {
-    schedule();
+    runtime_yield();
   }
   return tcb->result;
 }
@@ -129,15 +139,19 @@ uint64_t loch_get(uint64_t loch_tcb) {
 void check_for_work() {
   while (1) {
     tcb_t *tcb = sched_next(scheduler);
-    if (tcb == NULL)
-      usleep(10);
-    else {
+    if (tcb == NULL) {
+      printd("no work to do!");
+      usleep(100000);
+    } else {
       atomic_store(&tcb->state, RUNNING);
       state.current_context = tcb;
 
       atomic_fetch_add(&active_threads, 1);
       swapcontext(&state.wait_ctx, &tcb->ctx);
       atomic_fetch_sub(&active_threads, 1);
+    }
+    if (atomic_load(&gc_flag)) {
+      return;
     }
   }
 }
