@@ -33,13 +33,6 @@ typedef struct tcb {
   uint64_t *frame_bottom;
 } tcb_t;
 
-// calls into threads_start_here function with the heap pointer,
-// and this as args
-void tcb_runner(tcb_t *tcb, uint64_t arg);
-
-// sets the stack bottom of the tcb
-void tcb_set_stack_bottom(tcb_t *tcb, uint64_t *stack_bottom);
-
 // creates a new tcb with the closure pointer.
 // starts with a call to tcb_runner(this, closure_ptr)
 tcb_t *tcb_create(uint64_t closure_ptr);

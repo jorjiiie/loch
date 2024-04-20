@@ -7,6 +7,7 @@
 #endif
 
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "loch.h"
 #include "mutex.h"
@@ -18,7 +19,7 @@ mutex_t *mutex_create() {
 }
 void mutex_destroy(mutex_t *m) { free(m); }
 
-void lock(mutex_t *m) {
+void mutex_lock(mutex_t *m) {
   uint32_t exp = 0;
   while (atomic_compare_exchange_strong(&m->lock, &exp, 1)) {
     runtime_yield();
@@ -28,4 +29,23 @@ void lock(mutex_t *m) {
 }
 
 // we are the ONLY person to have this!
-void unlock(mutex_t *m) { atomic_store(&m->lock, 0); }
+void mutex_unlock(mutex_t *m) { atomic_store(&m->lock, 0); }
+
+spinlock_t *spinlock_create() {
+  spinlock_t *s = (spinlock_t *)malloc(sizeof(spinlock_t));
+  atomic_init(&s->lock, 0);
+  return s;
+}
+
+void spinlock_destroy(spinlock_t *s) { free(s); }
+
+void spinlock_lock(spinlock_t *s) {
+  uint32_t exp = 0;
+  while (1) {
+    if (atomic_compare_exchange_strong(&s->lock, &exp, 1)) {
+      return;
+    }
+  }
+}
+
+void spinlock_unlock(spinlock_t *s) { atomic_store(&s->lock, 0); }

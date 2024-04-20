@@ -5,22 +5,13 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 
+#include "loch.h"
 #include "tcb.h"
 
 #include "debug.h"
 
-// i think this should be in loch - we want to go to schedule after this
-// yah
-void tcb_runner(tcb_t *tcb, uint64_t arg) {
-  uint64_t ret = thread_code_starts_here(heap_ptr, HEAP_SIZE, arg);
-  tcb->result = ret;
-  atomic_store(&tcb->state, FINISHED);
-}
-
-// i think this all should be in loch
-
 tcb_t *tcb_create(uint64_t closure_ptr) {
-  printd("making closure with %d", closure_ptr);
+  printd("making closure with %llu", closure_ptr);
   tcb_t *tcb = (tcb_t *)malloc(sizeof(tcb_t));
   tcb->closure_ptr = closure_ptr;
   tcb->result = 0;

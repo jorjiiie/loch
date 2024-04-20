@@ -8,6 +8,7 @@
 
 #include "loch.h"
 #include "sched.h"
+#include "tcb.h"
 
 // pass it as a compile flag -DDEBUG_LOG
 #include "debug.h"
@@ -87,20 +88,19 @@ void loch_yield(uint64_t *rbp, uint64_t *rsp) {
 void runtime_yield() {
   state.next_context = sched_next(scheduler);
 
-  // enter waiting state
-  if (state.next_context == NULL) {
-    // maybe not do this (depends on how you go in and out)
-    // atomic_fetch_sub(&active_threads, 1);
-    state.current_context = NULL;
-    setcontext(&state.wait_ctx);
-  }
+  // no other threads, just continue
+  if (state.next_context == NULL)
+    return;
 
+  // swap to the other thread
   swapcontext(&state.current_context->ctx, &state.next_context->ctx);
   // we are now in state.next_context
   atomic_store(&state.current_context->state, NOT_RUNNING);
   atomic_store(&state.next_context->state, RUNNING);
 
   // AFTER we switch contexts! my face when multithreading
+  // i think we should put this before the swap LOL
+  // wait holy hell - needs to be a locked operation
   sched_enqueue(scheduler, state.current_context);
 
   state.current_context = state.next_context;
