@@ -6,6 +6,8 @@
 #include "sched.h"
 #include "tcb.h"
 
+#include "debug.h"
+
 #include <poll.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -60,7 +62,13 @@ int main() {
   for (int i = 0; i < 10; i++) {
     tcb_t *tcb = tcb_create(0);
     sched_enqueue(scheduler, tcb);
+    printd("enqueieng");
+    usleep(3000000);
   }
+  while (sched_size(scheduler)) {
+    usleep(1000);
+  }
+  atomic_store(&gc_flag, 1);
 
   for (int i = 0; i < NUM_THREADS; i++) {
     pthread_join(threads[i], NULL);

@@ -6,6 +6,8 @@
 #define _XOPEN_SOURCE
 #endif
 
+#include <stddef.h>
+
 typedef struct tcb tcb_t;
 typedef struct spinlock spinlock_t;
 // struct/class for scheduler!
@@ -19,7 +21,7 @@ typedef struct sched {
   spinlock_t *lock;
   node_t *head;
   node_t *tail;
-  int size;
+  size_t size;
 } sched_t;
 
 // get the next to schedule
@@ -31,6 +33,8 @@ tcb_t *sched_next(sched_t *sched);
 // tcb_t* passed in should be NOT_RUNNING,
 // must be thread safe
 void sched_enqueue(sched_t *sched, tcb_t *tcb);
+
+size_t sched_size(sched_t *sched);
 
 // initialize a scheduler
 sched_t *sched_create();
