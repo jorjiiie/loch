@@ -1,6 +1,6 @@
 #ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE
-
+#define _XOPEN_SOURCE 600
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
@@ -18,10 +18,9 @@ tcb_t *tcb_create(uint64_t closure_ptr) {
   atomic_init(&tcb->state, NOT_RUNNING);
 
   getcontext(&tcb->ctx);
-  tcb->ctx.uc_stack.ss_sp = mmap(NULL, LOCH_STACK_SIZE, PROT_READ | PROT_WRITE,
-                                 MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-  if (tcb->ctx.uc_stack.ss_sp == MAP_FAILED) {
-    perror("mmap");
+  tcb->ctx.uc_stack.ss_sp = calloc(LOCH_STACK_SIZE, 1);
+  if (tcb->ctx.uc_stack.ss_sp == NULL) {
+    perror("calloc");
     exit(1);
   }
   tcb->ctx.uc_stack.ss_size = LOCH_STACK_SIZE;
@@ -35,7 +34,7 @@ tcb_t *tcb_create(uint64_t closure_ptr) {
 }
 
 void tcb_destroy(tcb_t *tcb) {
+  free(tcb->ctx.uc_stack.ss_sp);
   munmap(tcb->ctx.uc_stack.ss_sp, LOCH_STACK_SIZE);
   free(tcb);
 }
-#endif

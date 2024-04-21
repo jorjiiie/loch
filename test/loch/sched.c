@@ -3,7 +3,7 @@
  * fifo queue implementation
  */
 #ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE
+#define _XOPEN_SOURCE 600
 #endif
 
 // TODO: asm level mutex will be implemented as

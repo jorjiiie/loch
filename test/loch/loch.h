@@ -8,7 +8,7 @@
 #define LOCH_H
 
 #ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE
+#define _XOPEN_SOURCE 600
 #endif
 
 // number of system threads to utilize (excluding main thread)
