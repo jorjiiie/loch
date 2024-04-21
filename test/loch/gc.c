@@ -14,7 +14,7 @@
 #include "loch.h"
 #include "set.h"
 #include "map.h"
-
+/*
 // constants
 extern uint64_t NUM_TAG_MASK;
 extern uint64_t CLOSURE_TAG_MASK;
@@ -38,6 +38,31 @@ extern uint64_t *TO_E;
 // state stuff
 extern gc_t *gc_state;
 extern _Thread_local thread_state_t state;
+*/
+// constants
+uint64_t NUM_TAG_MASK;
+uint64_t CLOSURE_TAG_MASK;
+uint64_t TUPLE_TAG_MASK;
+ uint64_t FORWARDING_TAG_MASK;
+ uint64_t THREAD_TAG_MASK;
+ uint64_t LOCK_TAG_MASK;
+ uint64_t CLOSURE_TAG;
+ uint64_t TUPLE_TAG;
+ uint64_t FORWARDING_TAG;
+ uint64_t THREAD_TAG;
+ uint64_t LOCK_TAG;
+ uint64_t NIL;
+ uint64_t tupleCounter;
+ uint64_t *STACK_BOTTOM;
+ uint64_t *FROM_S;
+ uint64_t *FROM_E;
+ uint64_t *TO_S;
+ uint64_t *TO_E;
+
+// state stuff
+ gc_t *gc_state;
+ extern _Thread_local thread_state_t state;
+
 
 gc_t *gc_init(uint64_t heap_size) {
     gc_t *gc = malloc(sizeof(gc_t));
@@ -124,7 +149,7 @@ uint64_t *copy_if_needed(uint64_t *addr, uint64_t *heap) {
 
     *addr = (uint64_t)(new_ptr) + LOCK_TAG;
   } else if ((v & THREAD_TAG_MASK) == THREAD_TAG) {
-    // no gc needed except the fact that we have seen these buddies
+    // no gc needed except to say that we have seen these buddies
     uint64_t tid = v - THREAD_TAG;
     set_insert(gc_state->seen_threads, tid);
   }

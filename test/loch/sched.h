@@ -10,7 +10,6 @@
 #include <stddef.h>
 
 typedef struct tcb tcb_t;
-typedef struct spinlock spinlock_t;
 // struct/class for scheduler!
 // this is currently the dumbest one possible
 typedef struct node {

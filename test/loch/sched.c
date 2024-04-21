@@ -23,13 +23,11 @@
 #include "tcb.h"
 
 tcb_t *sched_next(sched_t *sched) {
-  // except lock this!
   if (pthread_mutex_lock(sched->mutex)) {
     printlog("pthread_mutex_lock failed");
     exit(1);
   }
   node_t *node = sched->head;
-  printd("oh noes %p %lu", sched->head, sched->size);
   if (node == NULL) {
     if (pthread_mutex_unlock(sched->mutex)) {
       printlog("pthread_mutex_unlock failed");
@@ -40,7 +38,6 @@ tcb_t *sched_next(sched_t *sched) {
   tcb_t *tcb = node->tcb;
   sched->size--;
   sched->head = node->next;
-  printd("for some reason the next is %p %p", node, sched->head);
   if (sched->head == NULL)
     sched->tail = NULL;
 
@@ -55,12 +52,6 @@ void sched_enqueue(sched_t *sched, tcb_t *tcb) {
   if (pthread_mutex_lock(sched->mutex)) {
     printlog("pthread_mutex_lock failed");
     exit(1);
-  }
-  printd("adding something! %p %p", sched->head, sched->tail);
-  node_t *c = sched->head;
-  while (c != NULL) {
-    printd("going somewhere! %p %p", c, c->next);
-    c = c->next;
   }
 
   if (sched->head == NULL) {
