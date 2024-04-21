@@ -72,7 +72,6 @@ type 'a immexpr =
   | ImmBool of bool * 'a
   | ImmId of string * 'a
   | ImmNil of 'a
-  | ImmMutex of 'a
 
 and 'a cexpr =
   (* compound expressions *)
@@ -85,6 +84,7 @@ and 'a cexpr =
   | CGetItem of 'a immexpr * 'a immexpr * 'a
   | CSetItem of 'a immexpr * 'a immexpr * 'a immexpr * 'a
   | CLambda of string list * 'a aexpr * 'a
+  | CMutex of 'a
 
 and 'a aexpr =
   (* anf expressions *)
@@ -315,12 +315,12 @@ let atag (p : 'a aprogram) : tag aprogram =
     | CLambda (args, body, _) ->
         let lam_tag = tag () in
         CLambda (args, helpA body, lam_tag)
+    | CMutex _ -> CMutex (tag ())
   and helpI (i : 'a immexpr) : tag immexpr =
     match i with
     | ImmNil _ -> ImmNil (tag ())
     | ImmId (x, _) -> ImmId (x, tag ())
     | ImmNum (n, _) -> ImmNum (n, tag ())
     | ImmBool (b, _) -> ImmBool (b, tag ())
-    | ImmMutex _ -> ImmMutex (tag ())
   and helpP p = match p with AProgram (body, _) -> AProgram (helpA body, 0) in
   helpP p

@@ -304,7 +304,9 @@ let anf (p : tag program) : unit aprogram =
     | EBool (b, _) -> (ImmBool (b, ()), [])
     | EId (name, _) -> (ImmId (name, ()), [])
     | ENil _ -> (ImmNil (), [])
-    | EMutex _ -> (ImmMutex (), [])
+    | EMutex tag ->
+        let tmp = sprintf "mutex_%d\n" tag in
+        (ImmId (tmp, ()), [ BLet (tmp, CMutex ()) ])
     | ESeq _ -> raise (InternalCompilerError "ESeq gone")
     | ETuple (_, tag) ->
         let tmp = sprintf "tuple_%d\n" tag in
@@ -809,6 +811,7 @@ let free_vars (e : 'a aexpr) : string list =
     | CLambda (args, body, _) ->
         let fv = helpA body in
         List.fold_left (fun acc i -> StringSet.remove i acc) fv args
+    | CMutex _ -> StringSet.empty
     | CImmExpr i -> helpI i
   and helpI e =
     match e with
@@ -1430,10 +1433,7 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
       @ comp_e1
       @ [ IJmp (Label done_label); ILabel else_label ]
       @ comp_e2 @ [ ILabel done_label ]
-  | CImmExpr imm_e -> (
-      match imm_e with
-      | ImmMutex _ -> [ ICall (Label "_loch_mutex_create") ]
-      | _ -> [ IMov (Reg RAX, compile_imm imm_e env) ])
+  | CImmExpr imm_e -> [ IMov (Reg RAX, compile_imm imm_e env) ]
   | CTuple (exprs, t) ->
       (* allocate the memory and then return the pointer *)
       let name = sprintf "reserve_tuple_%d" t in
@@ -1541,6 +1541,7 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
       | Prim -> failwith "feels like this isn't supposed to be here"
       | Unknown -> failwith "Unknown function call type")
   | CLambda _ -> compile_clambda e envs ftag false
+  | CMutex _ -> [ ICall (Label "_loch_mutex_create") ]
 
 and compile_imm (e : tag immexpr) env =
   match e with
@@ -1549,7 +1550,6 @@ and compile_imm (e : tag immexpr) env =
   | ImmBool (false, _) -> const_false
   | ImmId (x, _) -> find env x
   | ImmNil _ -> Const nil_value
-  | ImmMutex _ -> failwith "mutex not implemented yet"
 
 and native_call label args =
   let rec zip_args regs args =

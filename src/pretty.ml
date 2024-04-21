@@ -243,6 +243,7 @@ and string_of_cexpr_with (depth : int) (print_a : 'a -> string) (c : 'a cexpr) :
           (ExtString.String.join ", " args)
           (string_of_aexpr body) (print_a a)
     | CImmExpr i -> string_of_immexpr i
+    | CMutex a -> "mutex " ^ print_a a
 
 and string_of_immexpr_with (print_a : 'a -> string) (i : 'a immexpr) : string =
   match i with
@@ -250,7 +251,6 @@ and string_of_immexpr_with (print_a : 'a -> string) (i : 'a immexpr) : string =
   | ImmNum (n, a) -> Int64.to_string n ^ print_a a
   | ImmBool (b, a) -> string_of_bool b ^ print_a a
   | ImmId (x, a) -> x ^ print_a a
-  | ImmMutex a -> "mutex" ^ print_a a
 
 and string_of_aprogram_with (depth : int) (print_a : 'a -> string)
     (p : 'a aprogram) : string =

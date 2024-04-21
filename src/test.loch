@@ -1,2 +1,1 @@
-let x = mutex() in
-	x
+(1, mutex())
