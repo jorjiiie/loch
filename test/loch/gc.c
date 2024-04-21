@@ -12,9 +12,9 @@
 
 #include "gc.h"
 #include "loch.h"
-#include "set.h"
 #include "map.h"
-/*
+#include "set.h"
+
 // constants
 extern uint64_t NUM_TAG_MASK;
 extern uint64_t CLOSURE_TAG_MASK;
@@ -38,54 +38,30 @@ extern uint64_t *TO_E;
 // state stuff
 extern gc_t *gc_state;
 extern _Thread_local thread_state_t state;
-*/
-// constants
-uint64_t NUM_TAG_MASK;
-uint64_t CLOSURE_TAG_MASK;
-uint64_t TUPLE_TAG_MASK;
- uint64_t FORWARDING_TAG_MASK;
- uint64_t THREAD_TAG_MASK;
- uint64_t LOCK_TAG_MASK;
- uint64_t CLOSURE_TAG;
- uint64_t TUPLE_TAG;
- uint64_t FORWARDING_TAG;
- uint64_t THREAD_TAG;
- uint64_t LOCK_TAG;
- uint64_t NIL;
- uint64_t tupleCounter;
- uint64_t *STACK_BOTTOM;
- uint64_t *FROM_S;
- uint64_t *FROM_E;
- uint64_t *TO_S;
- uint64_t *TO_E;
-
-// state stuff
- gc_t *gc_state;
- extern _Thread_local thread_state_t state;
-
 
 gc_t *gc_init(uint64_t heap_size) {
-    gc_t *gc = malloc(sizeof(gc_t));
-    gc->HEAP_SIZE = heap_size;
-    gc->heap_start = mmap(NULL, heap_size, PROT_READ | PROT_WRITE,
-                    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (gc->heap_start == MAP_FAILED) {
-        perror("mmap");
-        exit(1);
-    }
-    gc->heap_end = gc->heap_start + heap_size;
-    gc->heap_ptr = gc->heap_start;
+  gc_t *gc = malloc(sizeof(gc_t));
+  gc->HEAP_SIZE = heap_size;
+  gc->heap_start = mmap(NULL, heap_size, PROT_READ | PROT_WRITE,
+                        MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+  if (gc->heap_start == MAP_FAILED) {
+    perror("mmap");
+    exit(1);
+  }
+  gc->heap_end = gc->heap_start + heap_size;
+  gc->heap_ptr = gc->heap_start;
 
-    pthread_mutex_init(&gc->lock, NULL);
+  pthread_mutex_init(&gc->lock, NULL);
 
-    gc->active_threads = 0;
-    gc->gc_ack = 0;
-    atomic_flag_clear(&gc->gc_flag);
+  gc->active_threads = 0;
+  gc->gc_ack = 0;
 
-    gc->map = map_create();
-    gc->seen_threads = set_create();
+  gc->gc_flag = 0;
 
-    return gc;
+  gc->map = map_create();
+  gc->seen_threads = set_create();
+
+  return gc;
 }
 uint64_t *copy_if_needed(uint64_t *addr, uint64_t *heap) {
 
@@ -197,9 +173,10 @@ uint64_t *reserve(uint64_t wanted, uint64_t *rsp, uint64_t *rbp) {
     perror("pthread_mutex_lock");
     exit(1);
   }
-  if (gc_state->heap_ptr + wanted >= gc_state->heap_end) {
+  // alloc [heap_ptr, heap_ptr + wanted)
+  if (gc_state->heap_ptr + wanted > gc_state->heap_end) {
     // gc
-    atomic_flag_test_and_set(&gc_state->gc_flag);
+    atomic_store(&gc_state->gc_flag, 1);
 
     // wait until all threads are in a safe state
     while (atomic_load(&gc_state->gc_ack) !=
@@ -217,12 +194,11 @@ uint64_t *reserve(uint64_t wanted, uint64_t *rsp, uint64_t *rbp) {
     munmap(gc_state->heap_start, gc_state->HEAP_SIZE);
 
     // i am not going to both clearing everyone out
-    if (new_ptr + wanted >= (new_heap + gc_state->HEAP_SIZE)) {
+    if (new_ptr + wanted > (new_heap + gc_state->HEAP_SIZE)) {
       fprintf(stderr, "gc failed to allocate enough memory\n");
       exit(1);
     }
     // thread cleanup
-
 
     gc_state->heap_start = new_heap;
     gc_state->heap_ptr = new_ptr;
@@ -230,7 +206,7 @@ uint64_t *reserve(uint64_t wanted, uint64_t *rsp, uint64_t *rbp) {
 
     gc_state->heap_ptr += wanted;
 
-    atomic_flag_clear(&gc_state->gc_flag);
+    atomic_store(&gc_state->gc_flag, 0);
 
     atomic_fetch_sub(&gc_state->gc_ack, 1);
     if (pthread_mutex_unlock(&gc_state->lock)) {

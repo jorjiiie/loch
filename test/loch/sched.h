@@ -21,7 +21,7 @@ typedef struct sched {
   pthread_mutex_t *mutex;
   node_t *head;
   node_t *tail;
-  size_t size;
+  _Atomic size_t size;
 } sched_t;
 
 // get the next to schedule

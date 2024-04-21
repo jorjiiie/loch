@@ -89,4 +89,4 @@ sched_t *sched_create() {
   return sched;
 }
 // hopefully it doesn't need to be locked but it could be...
-size_t sched_size(sched_t *sched) { return sched->size; }
+size_t sched_size(sched_t *sched) { return atomic_load(&sched->size); }

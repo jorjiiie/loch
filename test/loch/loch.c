@@ -7,6 +7,7 @@
 #endif
 
 #include "loch.h"
+#include "gc.h"
 #include "sched.h"
 #include "tcb.h"
 
@@ -14,15 +15,6 @@
 #include "debug.h"
 
 #include <unistd.h>
-
-/*
- * Runtime stuff
- */
-extern uint64_t *heap_ptr;
-extern uint64_t *heap_end;
-extern uint64_t HEAP_SIZE;
-extern _Atomic uint64_t gc_ack; // TODO: MAKE SURE THESE ARE INITIALIZED
-extern _Atomic uint64_t gc_flag;
 
 extern uint64_t
 thread_code_starts_here(uint64_t *heap, uint64_t sz,
@@ -33,11 +25,11 @@ extern uint64_t do_something(uint64_t closure);
 /*
  * threading stuff
  */
-extern _Atomic uint64_t active_threads;
-
+extern gc_t *gc_state;
 extern sched_t *scheduler;
 
 extern _Atomic uint64_t thread_id;
+extern _Atomic uint8_t halt_flag;
 extern _Thread_local thread_state_t state;
 // table_t
 
@@ -86,11 +78,11 @@ void loch_yield(uint64_t *rbp, uint64_t *rsp) {
   // check if GC is necessary
   // we do we yield in here? because why not?
   // it doesn't matter.
-  atomic_fetch_add(&gc_ack, 1);
-  while (atomic_load(&gc_flag) == 1) {
+  atomic_fetch_add(&gc_state->gc_ack, 1);
+  while (atomic_load(&gc_state->gc_flag) == 1) {
     usleep(10);
   }
-  atomic_fetch_sub(&gc_ack, 1);
+  atomic_fetch_sub(&gc_state->gc_ack, 1);
   runtime_yield();
 }
 void runtime_yield() {
@@ -146,11 +138,12 @@ void check_for_work() {
       atomic_store(&tcb->state, RUNNING);
       state.current_context = tcb;
 
-      atomic_fetch_add(&active_threads, 1);
+      atomic_fetch_add(&gc_state->active_threads, 1);
       swapcontext(&state.wait_ctx, &tcb->ctx);
-      atomic_fetch_sub(&active_threads, 1);
+      atomic_fetch_sub(&gc_state->active_threads, 1);
     }
-    if (atomic_load(&gc_flag)) {
+    if (atomic_load(&halt_flag)) {
+      printlog("im done? lol");
       return;
     }
   }

@@ -2,35 +2,302 @@
 #define _XOPEN_SOURCE
 #endif
 
+#include "gc.h"
 #include "loch.h"
 #include "sched.h"
 #include "tcb.h"
 
 #include "debug.h"
 
-#include <poll.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/mman.h>
 #include <unistd.h>
 
-#define NUM_THREADS 2
-pthread_t threads[NUM_THREADS];
+// number of threads NOT counting the main thread
+#define NUM_THREADS 7
 
-uint64_t *heap_ptr = 0;
-uint64_t *heap_end = 0;
-uint64_t HEAP_SIZE = 0;
-_Atomic uint64_t gc_ack = 0;
-_Atomic uint64_t gc_flag = 0;
+typedef uint64_t SNAKEVAL;
 
+extern SNAKEVAL our_code_starts_here() asm("our_code_starts_here");
+extern SNAKEVAL
+thread_code_starts_here(SNAKEVAL closure) asm("thread_code_starts_here");
+extern void error() asm("error");
+extern SNAKEVAL
+set_stack_bottom(uint64_t *stack_bottom) asm("set_stack_bottom");
+extern SNAKEVAL print(SNAKEVAL val) asm("print");
+extern SNAKEVAL input() asm("input");
+extern SNAKEVAL printStack(SNAKEVAL val, uint64_t *STACK_BOTTOM, uint64_t *rsp,
+                           uint64_t *rbp, uint64_t args) asm("print_stack");
+extern SNAKEVAL equal(SNAKEVAL val1, SNAKEVAL val2) asm("equal");
+extern uint64_t *try_gc(uint64_t *alloc_ptr, uint64_t amount_needed,
+                        uint64_t *first_frame,
+                        uint64_t *stack_top) asm("try_gc");
+
+const uint64_t NUM_TAG_MASK = 0x0000000000000001;
+const uint64_t BOOL_TAG_MASK = 0x000000000000000f;
+const uint64_t TUPLE_TAG_MASK = 0x000000000000000f;
+const uint64_t CLOSURE_TAG_MASK = 0x000000000000000f;
+const uint64_t FORWARDING_TAG_MASK = 0x000000000000000f;
+const uint64_t THREAD_TAG_MASK = 0x000000000000000f;
+const uint64_t LOCK_TAG_MASK = 0x000000000000000f;
+const uint64_t NUM_TAG = 0x0000000000000000;
+const uint64_t BOOL_TAG = 0x0000000000000007;
+const uint64_t TUPLE_TAG = 0x0000000000000001;
+const uint64_t CLOSURE_TAG = 0x0000000000000005;
+const uint64_t FORWARDING_TAG = 0x0000000000000003;
+const uint64_t THREAD_TAG = 0x0000000000000009; // these are not right lol
+const uint64_t LOCK_TAG = 0x000000000000000b;
+
+const uint64_t BOOL_TRUE = 0xFFFFFFFFFFFFFFFF;
+const uint64_t BOOL_FALSE = 0x7FFFFFFFFFFFFFFF;
+const uint64_t NIL = ((uint64_t)NULL | TUPLE_TAG);
+
+typedef uint64_t error_code_t;
+const error_code_t COMP_NOT_NUM = 1;
+const error_code_t ARITH_NOT_NUM = 2;
+const error_code_t LOGIC_NOT_BOOL = 3;
+const error_code_t IF_NOT_BOOL = 4;
+const error_code_t OVERFLOW = 5;
+const error_code_t EXPECTED_TUPLE_GET = 6;
+const error_code_t EXPECTED_INT_GET = 7;
+const error_code_t EXPECTED_TUPLE_SET = 8;
+const error_code_t EXPECTED_INT_SET = 9;
+const error_code_t OUT_OF_MEMORY = 10;
+const error_code_t INDEX_TOO_SMALL = 11;
+const error_code_t INDEX_TOO_LARGE = 12;
+const error_code_t WANT_TUPLE_GOT_NIL = 13;
+const error_code_t ERR_CALL_NOT_CLOSURE = 14;
+const error_code_t ERR_CALL_ARITY_ERR = 15;
+
+// state stuff
+gc_t *gc_state;
 _Thread_local thread_state_t state;
+_Atomic uint64_t thread_id = 0;
+_Atomic uint8_t halt_flag = 0;
+sched_t *scheduler;
 
-uint64_t thread_code_starts_here(uint64_t *heap, uint64_t sz,
-                                 uint64_t closure) {
-  for (int i = 0; i < 10; i++) {
-    printf("LOL! %d\n", i);
-    usleep(100000); // 1s
+// threads
+pthread_t threads[NUM_THREADS + 1];
+
+SNAKEVAL equal(SNAKEVAL val1, SNAKEVAL val2) {
+  if (val1 == val2) {
+    return BOOL_TRUE;
   }
-  return 0;
+  if (val1 == NIL || val2 == NIL) {
+    return BOOL_FALSE;
+  }
+  if ((val1 & TUPLE_TAG_MASK) == TUPLE_TAG &&
+      (val2 & TUPLE_TAG_MASK) == TUPLE_TAG) {
+    uint64_t *tup1 = (uint64_t *)(val1 - TUPLE_TAG);
+    uint64_t *tup2 = (uint64_t *)(val2 - TUPLE_TAG);
+    if (tup1[0] != tup2[0]) {
+      return BOOL_FALSE;
+    }
+    for (uint64_t i = 1; i <= tup1[0] / 2; i++) {
+      if (equal(tup1[i], tup2[i]) == BOOL_FALSE)
+        return BOOL_FALSE;
+    }
+    return BOOL_TRUE;
+  }
+  return BOOL_FALSE;
+}
+
+uint64_t tupleCounter = 0;
+void printHelp(FILE *out, SNAKEVAL val) {
+  if (val == NIL) {
+    fprintf(out, "nil");
+  } else if ((val & NUM_TAG_MASK) == NUM_TAG) {
+    fprintf(out, "%llu",
+            ((int64_t)val) >> 1); // deliberately int64, so that it's signed
+  } else if (val == BOOL_TRUE) {
+    fprintf(out, "true");
+  } else if (val == BOOL_FALSE) {
+    fprintf(out, "false");
+  } else if ((val & CLOSURE_TAG_MASK) == CLOSURE_TAG) {
+    uint64_t *addr = (uint64_t *)(val - CLOSURE_TAG);
+    fprintf(out, "[%p - 5] ==> <function arity %llu, closed %llu, fn-ptr %p>",
+            (uint64_t *)val, addr[0] / 2, addr[1] / 2, (uint64_t *)addr[2]);
+  } else if ((val & TUPLE_TAG_MASK) == TUPLE_TAG) {
+    uint64_t *addr = (uint64_t *)(val - TUPLE_TAG);
+    // Check whether we've visited this tuple already
+    if ((*addr & 0x8000000000000000) != 0) {
+      fprintf(out, "<cyclic tuple %d>", (int)(*addr & 0x7FFFFFFFFFFFFFFF));
+      return;
+    }
+    uint64_t len = addr[0];
+    if (len & 0x1) { // actually, it's a forwarding pointer
+      fprintf(out, "forwarding to %p", (uint64_t *)(len - 1));
+      return;
+    } else {
+      len /= 2; // length is encoded
+    }
+    *(addr) = 0x8000000000000000 | (++tupleCounter);
+    fprintf(out, "(");
+    for (uint64_t i = 1; i <= len; i++) {
+      if (i > 1)
+        fprintf(out, ", ");
+      printHelp(out, addr[i]);
+    }
+    if (len == 1)
+      fprintf(out, ", ");
+    fprintf(out, ")");
+    // Unmark this tuple: restore its length
+    *(addr) = len * 2; // length is encoded
+  } else {
+    fprintf(out, "Unknown value: %#018llx", val);
+  }
+}
+
+SNAKEVAL printStack(SNAKEVAL val, uint64_t *STACK_BOTTOM, uint64_t *rsp,
+                    uint64_t *rbp, uint64_t args) {
+  printf("RSP: %#018llx\t==>  ", (uint64_t)rsp);
+  fflush(stdout);
+  printHelp(stdout, *rsp);
+  fflush(stdout);
+  printf("\nRBP: %#018llx\t==>  ", (uint64_t)rbp);
+  fflush(stdout);
+  printHelp(stdout, *rbp);
+  fflush(stdout);
+  printf("\n(difference: %llu)\n", (uint64_t)(rsp - rbp));
+  fflush(stdout);
+  printf("Requested return val: %#018llx\t==> ", (uint64_t)val);
+  fflush(stdout);
+  printHelp(stdout, val);
+  fflush(stdout);
+  printf("\n");
+  fflush(stdout);
+  printf("Num args: %llu\n", args);
+
+  uint64_t *origRsp = rsp;
+
+  if (rsp > rbp) {
+    printf("Error: RSP and RBP are not properly oriented\n");
+    fflush(stdout);
+  } else {
+    for (uint64_t *cur = rsp; cur < STACK_BOTTOM + 3; cur++) {
+      if (cur == STACK_BOTTOM) {
+        printf("BOT %#018llx: %#018llx\t==>  old rbp\n", (uint64_t)cur, *cur);
+        fflush(stdout);
+      } else if (cur == rbp) {
+        printf("RBP %#018llx: %#018llx\t==>  old rbp\n", (uint64_t)cur, *cur);
+        fflush(stdout);
+      } else if (cur == origRsp) {
+        printf("    %#018llx: %#018llx\t==>  old rbp\n", (uint64_t)cur, *cur);
+        fflush(stdout);
+      } else if (cur == rbp + 1) {
+        printf("    %#018llx: %#018llx\t==>  saved ret\n", (uint64_t)cur, *cur);
+        fflush(stdout);
+        rsp = rbp + 2;
+        rbp = (uint64_t *)(*rbp);
+      } else if (cur == STACK_BOTTOM + 2) {
+        printf("    %#018llx: %#018llx\t==>  heap\n", (uint64_t)cur, *cur);
+        fflush(stdout);
+      } else {
+        printf("    %#018llx: %#018llx\t==>  ", (uint64_t)cur, *cur);
+        fflush(stdout);
+        printHelp(stdout, *cur);
+        fflush(stdout);
+        printf("\n");
+        fflush(stdout);
+      }
+    }
+  }
+  return val;
+}
+
+SNAKEVAL input() {
+  uint64_t ans;
+  scanf("%llu", &ans);
+  return ans << 1;
+}
+
+SNAKEVAL print(SNAKEVAL val) {
+  printHelp(stdout, val);
+  printf("\n");
+  fflush(stdout);
+  return val;
+}
+
+void naive_print_heap(uint64_t *heap, uint64_t *heap_end) {
+  printf("In naive_print_heap from %p to %p\n", heap, heap_end);
+  for (uint64_t i = 0; i < (uint64_t)(heap_end - heap); i += 1) {
+    printf("  %llu/%p: %p (%llu)\n", i, (heap + i), (uint64_t *)(*(heap + i)),
+           *(heap + i));
+  }
+}
+
+void error(uint64_t code, SNAKEVAL val) {
+  switch (code) {
+  case COMP_NOT_NUM:
+    fprintf(stderr, "Error: comparison expected a number, got ");
+    break;
+  case ARITH_NOT_NUM:
+    fprintf(stderr, "Error: arithmetic expected a number, got ");
+    break;
+  case LOGIC_NOT_BOOL:
+    fprintf(stderr, "Error: logic expected a boolean, got ");
+    break;
+  case IF_NOT_BOOL:
+    fprintf(stderr, "Error: if expected a boolean, got ");
+    break;
+  case OVERFLOW:
+    fprintf(stderr, "Error: integer overflow, got ");
+    break;
+  case EXPECTED_TUPLE_GET:
+    fprintf(stderr, "Error: expected tuple, got something in tuple get ");
+    break;
+  case EXPECTED_INT_GET:
+    fprintf(stderr, "Error: expected int, got something in int get ");
+    break;
+  case EXPECTED_TUPLE_SET:
+    fprintf(stderr, "Error: expected tuple, got something in tuple set ");
+    break;
+  case EXPECTED_INT_SET:
+    fprintf(stderr, "Error: expected int, got something in int set ");
+    break;
+  case OUT_OF_MEMORY:
+    fprintf(stderr, "Error: out of memory\n");
+    break;
+  case INDEX_TOO_SMALL:
+    fprintf(stderr, "Error: index too small, got ");
+    break;
+  case INDEX_TOO_LARGE:
+    fprintf(stderr, "Error: index too large, got (don't know size of tuple) ");
+    break;
+  case WANT_TUPLE_GOT_NIL:
+    fprintf(stderr, "Error: expected tuple, got nil: access component of nil ");
+    break;
+  case ERR_CALL_NOT_CLOSURE:
+    fprintf(stderr, "Error: tried to call a non-closure value: ");
+    break;
+  case ERR_CALL_ARITY_ERR:
+    fprintf(stderr, "Error: arity mismatch in call\n");
+    goto skip_print;
+  default:
+    fprintf(stderr, "Error: Unknown error code: %llu, val: ", code);
+  }
+  fprintf(stderr, "\n%p ==> ", (uint64_t *)val);
+  printHelp(stderr, val);
+  fprintf(stderr, "\n");
+  fflush(stderr);
+  naive_print_heap(gc_state->heap_ptr,
+                   gc_state->heap_end); // you really want to do getters and
+                                        // setters for lock reasons
+  fflush(stdout);
+skip_print:
+  munmap(gc_state->heap_start, gc_state->HEAP_SIZE);
+  exit(code);
+}
+
+void *loch_runner(void *x) {
+  // initialize thread local stuff
+  state.current_context = NULL;
+  state.next_context = NULL;
+  state.thread_id = atomic_fetch_add(&thread_id, 1);
+  check_for_work();
+  return NULL;
 }
 uint64_t do_something(uint64_t arg) {
   for (int i = 0; i < 10; i++) {
@@ -41,38 +308,52 @@ uint64_t do_something(uint64_t arg) {
   return 0;
 }
 
-_Atomic uint64_t active_threads = 0;
-sched_t *scheduler;
+int main(int argc, char **argv) {
+  uint64_t HEAP_SIZE = 100000;
+  HEAP_SIZE = 100000;
+  if (argc > 1) {
+    HEAP_SIZE = atoi(argv[1]);
+  }
+  if (HEAP_SIZE < 0 || HEAP_SIZE > 1000000) {
+    HEAP_SIZE = 0;
+  }
+  gc_state = gc_init(HEAP_SIZE);
 
-_Atomic uint64_t thread_id = 1;
+  uint64_t *aligned = (uint64_t *)(((uint64_t)gc_state->heap_ptr + 15) & ~0xF);
+  gc_state->heap_end = aligned + HEAP_SIZE;
 
-void *loch_runner(void *x) {
-  // initialize thread local stuff
-  state.current_context = NULL;
-  state.next_context = NULL;
-  state.thread_id = atomic_fetch_add(&thread_id, 1);
-  check_for_work();
-  return NULL;
-}
-
-int main() {
   scheduler = sched_create();
+  atomic_store(&halt_flag, 0);
+
   for (int i = 0; i < NUM_THREADS; i++) {
     pthread_create(&threads[i], NULL, loch_runner, NULL);
   }
 
   for (int i = 0; i < 10; i++) {
-    tcb_t *tcb = tcb_create(0);
+    tcb_t *tcb = tcb_create(i);
     sched_enqueue(scheduler, tcb);
-    printd("enqueieng");
+    printlog("enqueue!");
     usleep(3000);
   }
-  while (sched_size(scheduler)) {
+  SNAKEVAL result;
+  // slight problem of what the main thread does - probably just fake a
+  // context too?
+
+  printlog("%lu %llu", sched_size(scheduler),
+           atomic_load(&gc_state->active_threads));
+  while (sched_size(scheduler) || atomic_load(&gc_state->active_threads) != 0) {
     usleep(1000);
   }
-  atomic_store(&gc_flag, 1);
+  printlog("DONE");
+  // SNAKEVAL result = our_code_starts_here();
 
+  atomic_store(&halt_flag, 1);
   for (int i = 0; i < NUM_THREADS; i++) {
     pthread_join(threads[i], NULL);
   }
+
+  print(result);
+
+  munmap(gc_state->heap_start, gc_state->HEAP_SIZE);
+  return 0;
 }
