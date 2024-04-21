@@ -308,6 +308,21 @@ uint64_t do_something(uint64_t arg) {
   return 0;
 }
 
+void loch_setup(void) {
+  scheduler = sched_create();
+  atomic_store(&halt_flag, 0);
+
+  for (int i = 0; i < NUM_THREADS; i++) {
+    pthread_create(&threads[i], NULL, loch_runner, NULL);
+  }
+}
+
+void loch_teardown() {
+  atomic_store(&halt_flag, 1);
+  for (int i = 0; i < NUM_THREADS; i++) {
+    pthread_join(threads[i], NULL);
+  }
+}
 int main(int argc, char **argv) {
   uint64_t HEAP_SIZE = 100000;
   HEAP_SIZE = 100000;
@@ -322,12 +337,7 @@ int main(int argc, char **argv) {
   uint64_t *aligned = (uint64_t *)(((uint64_t)gc_state->heap_ptr + 15) & ~0xF);
   gc_state->heap_end = aligned + HEAP_SIZE;
 
-  scheduler = sched_create();
-  atomic_store(&halt_flag, 0);
-
-  for (int i = 0; i < NUM_THREADS; i++) {
-    pthread_create(&threads[i], NULL, loch_runner, NULL);
-  }
+  loch_setup();
 
   for (int i = 0; i < 10; i++) {
     tcb_t *tcb = tcb_create(i);
@@ -337,19 +347,15 @@ int main(int argc, char **argv) {
   }
   SNAKEVAL result;
   // slight problem of what the main thread does - probably just fake a
-  // context too?
+  // context too? (or just chill here and we throw out_code_starts_here as a
+  // context?)
 
   printlog("%lu %llu", sched_size(scheduler),
            atomic_load(&gc_state->active_threads));
-  while (sched_size(scheduler) || atomic_load(&gc_state->active_threads) != 0) {
-    usleep(1000);
-  }
-  printlog("DONE");
   // SNAKEVAL result = our_code_starts_here();
 
-  atomic_store(&halt_flag, 1);
-  for (int i = 0; i < NUM_THREADS; i++) {
-    pthread_join(threads[i], NULL);
+  while (sched_size(scheduler) || atomic_load(&gc_state->active_threads) != 0) {
+    usleep(1000);
   }
 
   print(result);
