@@ -37,4 +37,6 @@ typedef struct tcb {
 // starts with a call to tcb_runner(this, closure_ptr)
 tcb_t *tcb_create(uint64_t closure_ptr);
 
+void tcb_destroy(tcb_t *tcb);
+
 #endif

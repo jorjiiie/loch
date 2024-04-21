@@ -33,4 +33,9 @@ tcb_t *tcb_create(uint64_t closure_ptr) {
 
   return tcb;
 }
+
+void tcb_destroy(tcb_t *tcb) {
+  munmap(tcb->ctx.uc_stack.ss_sp, LOCH_STACK_SIZE);
+  free(tcb);
+}
 #endif
