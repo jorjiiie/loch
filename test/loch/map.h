@@ -32,12 +32,7 @@ typedef struct map {
   kv_t *table[MAP_SIZE];
   _Atomic size_t size;
 
-// and so it begins
-#ifdef LOCH_RUNTIME
-  mutex_t *locks[NUM_LOCKS];
-#else
-  pthread_mutex_t locks[NUM_LOCKS];
-#endif
+  pthread_rwlock_t locks[NUM_LOCKS];
 
 } map_t;
 

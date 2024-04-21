@@ -21,11 +21,7 @@ map_t *map_create() {
   map_t *mp = (map_t *)malloc(sizeof(map_t));
   mp->size = 0;
   for (int i = 0; i < NUM_LOCKS; i++) {
-#ifdef LOCH_RUNTIME
-    mp->locks[i] = mutex_create();
-#else
-    pthread_mutex_init(&mp->locks[i], NULL);
-#endif
+    pthread_rwlock_init(&mp->locks[i], NULL);
   }
   for (int i = 0; i < MAP_SIZE; i++) {
     mp->table[i] = NULL;
@@ -37,39 +33,28 @@ tcb_t *map_get(map_t *map, uint64_t key) {
   size_t bucket = key & (MAP_SIZE - 1);
   size_t lock = key & (NUM_LOCKS - 1);
 
-#ifdef LOCH_RUNTIME
-  mutex_lock(map->locks[lock]);
-#else
-  if (pthread_mutex_lock(&map->locks[lock])) {
-    perror("pthread_mutex_lock");
+  if (pthread_rwlock_rdlock(&map->locks[lock])) {
+    perror("pthread_rwlock_rdlock");
     exit(1);
   }
-#endif
 
   kv_t *c = map->table[bucket];
 
   while (c != NULL) {
     if (c->key == key) {
-#ifdef LOCH_RUNTIME
-      mutex_unlock(map->locks[lock]);
-#else
-      if (pthread_mutex_unlock(&map->locks[lock])) {
-        perror("pthread_mutex_unlock");
+
+      if (pthread_rwlock_unlock(&map->locks[lock])) {
+        perror("pthread_rwlock_unlock");
         exit(1);
       }
-#endif
       return c->value;
     }
     c = c->next;
   }
-#ifdef LOCH_RUNTIME
-  mutex_unlock(map->locks[lock]);
-#else
-  if (pthread_mutex_unlock(&map->locks[lock])) {
-    perror("pthread_mutex_unlock");
+  if (pthread_rwlock_unlock(&map->locks[lock])) {
+    perror("pthread_rwlock_unlock");
     exit(1);
   }
-#endif
   return NULL;
 }
 
@@ -77,14 +62,10 @@ void map_put(map_t *map, uint64_t key, tcb_t *value) {
   uint64_t bucket = key & (MAP_SIZE - 1);
   uint64_t lock = key & (NUM_LOCKS - 1);
 
-#ifdef LOCH_RUNTIME
-  mutex_lock(map->locks[lock]);
-#else
-  if (pthread_mutex_lock(&map->locks[lock])) {
-    perror("pthread_mutex_lock");
+  if (pthread_rwlock_wrlock(&map->locks[lock])) {
+    perror("pthread_rwlock_wrlock");
     exit(1);
   }
-#endif
 
   map->size++;
 
@@ -97,28 +78,20 @@ void map_put(map_t *map, uint64_t key, tcb_t *value) {
 
   map->table[bucket] = n;
 
-#ifdef LOCH_RUNTIME
-  mutex_unlock(map->locks[lock]);
-#else
-  if (pthread_mutex_unlock(&map->locks[lock])) {
-    perror("pthread_mutex_unlock");
+  if (pthread_rwlock_unlock(&map->locks[lock])) {
+    perror("pthread_rwlock_unlock");
     exit(1);
   }
-#endif
 }
 
 void map_erase(map_t *map, uint64_t key) {
   uint64_t bucket = key & (MAP_SIZE - 1);
   uint64_t lock = key & (NUM_LOCKS - 1);
 
-#ifdef LOCH_RUNTIME
-  mutex_lock(map->locks[lock]);
-#else
-  if (pthread_mutex_lock(&map->locks[lock])) {
-    perror("pthread_mutex_lock");
+  if (pthread_rwlock_wrlock(&map->locks[lock])) {
+    perror("pthread_rwlock_wrlock");
     exit(1);
   }
-#endif
   map->size--;
 
   kv_t *c = map->table[bucket];
@@ -144,12 +117,8 @@ void map_erase(map_t *map, uint64_t key) {
   assert(0);
 
 cleanup:
-#ifdef LOCH_RUNTIME
-  mutex_unlock(map->locks[lock]);
-#else
-  if (pthread_mutex_unlock(&map->locks[lock])) {
-    perror("pthread_mutex_unlock");
+  if (pthread_rwlock_unlock(&map->locks[lock])) {
+    perror("pthread_rwlock_unlock");
     exit(1);
   }
-#endif
 }

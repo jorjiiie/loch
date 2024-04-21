@@ -9,7 +9,6 @@
 #include <stdlib.h>
 
 #include "debug.h"
-#include "mutex.h"
 #include "sched.h"
 #include "tcb.h"
 
