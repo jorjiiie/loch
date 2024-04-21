@@ -43,7 +43,6 @@ prim1 :
   | MUTEX { Mutex }
   | LOCK { Lock }
   | UNLOCK { Unlock }
-  | SCOPEDLOCK { ScopedLock }
 
 bindings :
   | bind EQUAL expr { [($1, $3, full_span())] }
@@ -99,6 +98,8 @@ binop_expr :
   | binop_operand %prec PLUS { $1 } 
 
 binop_operand :
+  // scoped lock
+  | SCOPEDLOCK LPARENNOSPACE expr COMMA expr RPAREN { EPrim2(ScopedLock, $3, $5, full_span()) }
   // Primops
   | prim1 LPARENNOSPACE expr RPAREN { EPrim1($1, $3, full_span()) }
   // Tuples
