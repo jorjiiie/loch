@@ -30,7 +30,7 @@ void *pthread_remove(void *arg) {
   return NULL;
 }
 
-/*
+
 int main() {
   m = map_create();
   pthread_t threads[NUM_THREAD];
@@ -58,4 +58,4 @@ int main() {
     assert(m->table[i] == NULL);
   }
 }
-*/
+
