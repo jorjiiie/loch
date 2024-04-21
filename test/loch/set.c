@@ -10,6 +10,7 @@
 #include "set.h"
 #include "debug.h"
 
+#include <inttypes.h>
 #include <assert.h>
 #include <stdlib.h>
 
@@ -62,7 +63,7 @@ void set_clear(set_t *set) {
 void set_dump(set_t *set) {
     for (int i = 0; i < SET_SIZE; i++) {
         if (set->occupied[i]) {
-            printf("%llu\n", set->items[i]);
+            printf("%" PRIu64 "\n", set->items[i]);
         }
     }
 }
