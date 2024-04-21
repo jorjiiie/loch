@@ -53,8 +53,10 @@ void tcb_runner(uint32_t tcb_high, uint32_t tcb_low, uint32_t closure_high,
   // uint64_t ret = thread_code_starts_here(heap_ptr, HEAP_SIZE, arg);
   uint64_t ret = do_something(arg);
   tcb->result = ret;
+
+  state.current_context = state.next_context = NULL;
   atomic_store(&tcb->state, FINISHED);
-  swapcontext(&tcb->ctx, &state.wait_ctx);
+  setcontext(&state.wait_ctx);
 }
 
 uint64_t tcb_set_stack_bottom(uint64_t *stack_bottom) {
@@ -92,12 +94,24 @@ void runtime_yield() {
   if (state.next_context == NULL)
     return;
 
-  printd("BEFORE STATE %p", &state);
+  printd_mt("be4 STATE %p %p %p", &state, state.current_context,
+            state.next_context);
+
   // swap to the other thread
   swapcontext(&state.current_context->ctx, &state.next_context->ctx);
-  printd("AFTER STATE %p", &state);
+
+  printd_mt("AFTER STATE %p %p %p", &state, state.current_context,
+            state.next_context);
   // we are now in state.next_context
+  // although not strictly true, since this could have resumed from somewhere
+  // else. as in, someone finishes, we go to wait, then we resume here.
   atomic_store(&state.current_context->state, NOT_RUNNING);
+  if (state.next_context == NULL) {
+    // return from finish
+    // do NOT do the below
+    return;
+  }
+
   atomic_store(&state.next_context->state, RUNNING);
 
   // AFTER we switch contexts! my face when multithreading

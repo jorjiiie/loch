@@ -302,7 +302,9 @@ void *loch_runner(void *x) {
 uint64_t do_something(uint64_t arg) {
   for (int i = 0; i < 10; i++) {
     printf("LOL! %d\n", i);
+
     usleep(100000); // 1s
+    runtime_yield();
   }
   printd_mt("FINISHED_TASK!");
   return 0;
