@@ -27,6 +27,7 @@ const :
   | TRUE { EBool(true, full_span()) }
   | FALSE { EBool(false, full_span()) }
   | NIL %prec SEMI { ENil(full_span()) }
+  | MUTEX LPARENNOSPACE RPAREN { EMutex (full_span()) }
 
 prim1 :
   | ADD1 { Add1 }
@@ -40,7 +41,6 @@ prim1 :
   | THREAD { Thread }
   | GET { Get }
   | START { Start }
-  | MUTEX { Mutex }
   | LOCK { Lock }
   | UNLOCK { Unlock }
 

@@ -22,7 +22,6 @@ let string_of_op1 op =
   | Thread -> "thread"
   | Get -> "get"
   | Start -> "start"
-  | Mutex -> "mutex"
   | Lock -> "lock"
   | Unlock -> "unlock"
 
@@ -39,7 +38,6 @@ let name_of_op1 op =
   | Thread -> "Thread"
   | Get -> "Get"
   | Start -> "Start"
-  | Mutex -> "Mutex"
   | Lock -> "Lock"
   | Unlock -> "Unlock"
 
@@ -110,6 +108,7 @@ and string_of_expr_with (depth : int) (print_a : 'a -> string) (e : 'a expr) :
     | ENumber (n, a) -> Int64.to_string n ^ print_a a
     | EBool (b, a) -> string_of_bool b ^ print_a a
     | ENil a -> "nil " ^ print_a a
+    | EMutex a -> "mutex " ^ print_a a
     | EId (x, a) -> x ^ print_a a
     | EPrim1 (op, e, a) ->
         sprintf "%s(%s)%s" (string_of_op1 op) (string_of_expr e) (print_a a)
@@ -251,6 +250,7 @@ and string_of_immexpr_with (print_a : 'a -> string) (i : 'a immexpr) : string =
   | ImmNum (n, a) -> Int64.to_string n ^ print_a a
   | ImmBool (b, a) -> string_of_bool b ^ print_a a
   | ImmId (x, a) -> x ^ print_a a
+  | ImmMutex a -> "mutex" ^ print_a a
 
 and string_of_aprogram_with (depth : int) (print_a : 'a -> string)
     (p : 'a aprogram) : string =
@@ -396,6 +396,9 @@ let rec format_expr (fmt : Format.formatter) (print_a : 'a -> string)
       close_paren fmt
   | ENil a ->
       open_label fmt "ENil" (print_a a);
+      close_paren fmt
+  | EMutex a ->
+      open_label fmt "EMutex" (print_a a);
       close_paren fmt
   | EId (x, a) ->
       open_label fmt "EId" (print_a a);

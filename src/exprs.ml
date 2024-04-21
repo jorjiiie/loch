@@ -7,7 +7,21 @@ let debug_printf fmt =
 
 type tag = int
 type sourcespan = Lexing.position * Lexing.position
-type prim1 = Add1 | Sub1 | Print | IsBool | IsNum | IsTuple | Not | PrintStack | Thread | Get | Start | Mutex | Lock | Unlock
+
+type prim1 =
+  | Add1
+  | Sub1
+  | Print
+  | IsBool
+  | IsNum
+  | IsTuple
+  | Not
+  | PrintStack
+  | Thread
+  | Get
+  | Start
+  | Lock
+  | Unlock
 
 type prim2 =
   | Plus
@@ -43,6 +57,7 @@ and 'a expr =
   | ENumber of int64 * 'a
   | EBool of bool * 'a
   | ENil of 'a
+  | EMutex of 'a
   | EId of string * 'a
   | EApp of 'a expr * 'a expr list * call_type * 'a
   | ELambda of 'a bind list * 'a expr * 'a
@@ -57,6 +72,7 @@ type 'a immexpr =
   | ImmBool of bool * 'a
   | ImmId of string * 'a
   | ImmNil of 'a
+  | ImmMutex of 'a
 
 and 'a cexpr =
   (* compound expressions *)
@@ -89,6 +105,7 @@ let get_tag_E e =
   | EPrim2 (_, _, _, t) -> t
   | EIf (_, _, _, t) -> t
   | ENil t -> t
+  | EMutex t -> t
   | ENumber (_, t) -> t
   | EBool (_, t) -> t
   | EId (_, t) -> t
@@ -112,6 +129,7 @@ let rec map_tag_E (f : 'a -> 'b) (e : 'a expr) =
   | ENumber (n, a) -> ENumber (n, f a)
   | EBool (b, a) -> EBool (b, f a)
   | ENil a -> ENil (f a)
+  | EMutex a -> EMutex (f a)
   | EPrim1 (op, e, a) ->
       let tag_prim = f a in
       EPrim1 (op, map_tag_E f e, tag_prim)
@@ -223,6 +241,7 @@ and untagE e =
   | ENumber (n, _) -> ENumber (n, ())
   | EBool (b, _) -> EBool (b, ())
   | ENil _ -> ENil ()
+  | EMutex _ -> EMutex ()
   | EPrim1 (op, e, _) -> EPrim1 (op, untagE e, ())
   | EPrim2 (op, e1, e2, _) -> EPrim2 (op, untagE e1, untagE e2, ())
   | ELet (binds, body, _) ->
@@ -302,5 +321,6 @@ let atag (p : 'a aprogram) : tag aprogram =
     | ImmId (x, _) -> ImmId (x, tag ())
     | ImmNum (n, _) -> ImmNum (n, tag ())
     | ImmBool (b, _) -> ImmBool (b, tag ())
+    | ImmMutex _ -> ImmMutex (tag ())
   and helpP p = match p with AProgram (body, _) -> AProgram (helpA body, 0) in
   helpP p

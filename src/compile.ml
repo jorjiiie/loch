@@ -161,6 +161,7 @@ let rename_and_tag (p : tag program) : tag program =
     | ENumber _ -> e
     | EBool _ -> e
     | ENil _ -> e
+    | EMutex _ -> e
     | EId (name, tag) -> (
         try EId (find env name, tag) with InternalCompilerError _ -> e)
     | EApp (func, args, ct, tag) ->
@@ -300,6 +301,7 @@ let anf (p : tag program) : unit aprogram =
     | EBool (b, _) -> (ImmBool (b, ()), [])
     | EId (name, _) -> (ImmId (name, ()), [])
     | ENil _ -> (ImmNil (), [])
+    | EMutex _ -> (ImmMutex (), [])
     | ESeq _ -> raise (InternalCompilerError "ESeq gone")
     | ETuple (_, tag) ->
         let tmp = sprintf "tuple_%d\n" tag in
@@ -468,6 +470,7 @@ let is_well_formed (p : sourcespan program) : sourcespan program fallible =
     | ESetItem (e1, e2, e3, _) -> wf_E e1 ctx @ wf_E e2 ctx @ wf_E e3 ctx
     | ESeq (e1, e2, _) -> wf_E e1 ctx @ wf_E e2 ctx
     | ENil _ -> []
+    | EMutex _ -> []
     | ELambda (bindings, body, _) ->
         let extra_ctx =
           List.map
@@ -549,7 +552,7 @@ let desugar1 (p : sourcespan program) : sourcespan program =
     in
     match e with
     | ESeq (e1, e2, t) -> ESeq (helpE e1, helpE e2, t)
-    | ENumber _ | EBool _ | ENil _ | EId _ -> e
+    | ENumber _ | EBool _ | ENil _ | EId _ | EMutex _ -> e
     | ETuple (exp, t) -> ETuple (List.map helpE exp, t)
     | ELet (binds, exp, t) ->
         let new_binds = List.concat_map (fun (b, e, _) -> helpBind b e) binds in
@@ -723,6 +726,7 @@ let desugar2 (p : sourcespan program) : sourcespan program =
     | ENumber (n, tag) -> ENumber (n, tag)
     | EBool (b, tag) -> EBool (b, tag)
     | ENil (t, tag) -> ENil (t, tag)
+    | EMutex (t, tag) -> EMutex (t, tag)
     | EPrim1 (op, e, tag) -> EPrim1 (op, helpE e, tag)
     | EPrim2 (op, e1, e2, tag) -> EPrim2 (op, helpE e1, helpE e2, tag)
     | ELet (binds, body, tag) ->
@@ -1202,7 +1206,6 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
       | Thread -> failwith "thread not implemented yet"
       | Get -> failwith "get not implemented yet"
       | Start -> failwith "start not implemented yet"
-      | Mutex -> failwith "mutex not implemented yet"
       | Lock -> failwith "lock not implemented yet"
       | Unlock -> failwith "unlock not implemented yet")
   | CPrim2 (p2, ex1, ex2, t) -> (
@@ -1469,6 +1472,7 @@ and compile_imm (e : tag immexpr) env =
   | ImmBool (false, _) -> const_false
   | ImmId (x, _) -> find env x
   | ImmNil _ -> Const nil_value
+  | ImmMutex _ -> failwith "mutex not implemented yet"
 
 and native_call label args =
   let rec zip_args regs args =
