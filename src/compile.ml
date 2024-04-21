@@ -37,15 +37,18 @@ and is_imm e =
 let const_true = HexConst 0xFFFFFFFFFFFFFFFFL
 let const_false = HexConst 0x7FFFFFFFFFFFFFFFL
 let bool_mask = HexConst 0x8000000000000000L
-let bool_tag = 0x0000000000000007L
-let bool_tag_mask = 0x0000000000000007L
+let bool_tag = 0x000000000000000fL
+let bool_tag_mask = 0x000000000000000fL
 let num_tag = 0x0000000000000000L
 let num_tag_mask = 0x0000000000000001L
 let closure_tag = 0x0000000000000005L
-let closure_tag_mask = 0x0000000000000007L
+let closure_tag_mask = 0x000000000000000fL
 let tuple_tag = 0x0000000000000001L
-let tuple_tag_mask = 0x0000000000000007L
-let tuple_mask = 0x0000000000000007L
+let tuple_mask = 0x000000000000000fL
+let thread_tag = 0x0000000000000009L
+let thread_mask = 0x000000000000000fL
+let mutex_tag = 0x000000000000000aL
+let mutex_mask = 0x000000000000000fL
 let pad_const = Const (Int64.of_string "0x69420f3f0")
 let nil_value = 0x0000000000000001L
 let const_nil = HexConst tuple_tag
@@ -1203,11 +1206,82 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
             ILabel done_label;
           ]
       | PrintStack -> failwith "not implemented in loch :c"
-      | Thread -> failwith "thread not implemented yet"
-      | Get -> failwith "get not implemented yet"
-      | Start -> failwith "start not implemented yet"
-      | Lock -> failwith "lock not implemented yet"
-      | Unlock -> failwith "unlock not implemented yet")
+      | Thread ->
+          (* doesn't block*)
+          let lam = compile_imm ex env in
+          [
+            IMov (Reg RAX, lam);
+            IMov (Reg R11, Const closure_tag_mask);
+            IAnd (Reg RAX, Reg R11);
+            ICmp (Reg RAX, Const closure_tag);
+            IJne (Label "want_closure_thread");
+            IMov (Reg RDI, Reg RAX);
+            ICall (Label "_loch_thread");
+            IAdd (Reg RAX, Const thread_tag);
+          ]
+      | Get ->
+          (* possibly block *)
+          let th = compile_imm ex env in
+          [
+            IMov (Reg RAX, th);
+            IMov (Reg R11, Const thread_mask);
+            IAnd (Reg RAX, Reg R11);
+            ICmp (Reg RAX, Const thread_tag);
+            IJne (Label "want_thread_get");
+            IMov (Reg RDI, Reg RAX);
+            IMov (Reg RSI, Reg RBP);
+            IMov (Reg RDX, Reg RSP);
+            ICall (Label "_loch_get");
+          ]
+      | Start ->
+          (* doesn't block*)
+          let th = compile_imm ex env in
+          [
+            IMov (Reg RAX, th);
+            IMov (Reg R11, Const thread_mask);
+            IAnd (Reg RAX, Reg R11);
+            ICmp (Reg RAX, Const thread_tag);
+            IJne (Label "want_thread_start");
+            IMov (Reg RDI, Reg RAX);
+            ICall (Label "_loch_start");
+          ]
+      | Lock ->
+          (* absolutely blocks*)
+          let mtx = compile_imm ex env in
+          let loop_label = sprintf "lock_loop_%d" t in
+          let acq_label = sprintf "lock_acq_%d" t in
+          [
+            IMov (Reg RAX, mtx);
+            IMov (Reg R11, Const mutex_mask);
+            IAnd (Reg RAX, Reg R11);
+            ICmp (Reg RAX, Const mutex_tag);
+            IJne (Label "want_mutex_lock");
+            ILabel loop_label;
+            IMov (Reg R12, mtx);
+            ISub (Reg R12, Const mutex_tag);
+            IMov (Reg RAX, Const 1L);
+            IXchg (Reg RAX, RegOffset (0, R12));
+            ICmp (Reg RAX, Const 0L);
+            IJe (Label acq_label);
+            IMov (Reg RDI, Reg RSP);
+            IMov (Reg RSI, Reg RBP);
+            ICall (Label "_loch_yield");
+            IJmp (Label loop_label);
+            ILabel acq_label;
+          ]
+      | Unlock ->
+          let mtx = compile_imm ex env in
+          [
+            IMov (Reg RAX, mtx);
+            IMov (Reg R11, Const mutex_mask);
+            IAnd (Reg RAX, Reg R11);
+            ICmp (Reg RAX, Const mutex_tag);
+            IJne (Label "want_mutex_unlock");
+            IMov (Reg R12, mtx);
+            ISub (Reg R12, Const mutex_tag);
+            IMov (Reg RAX, Const 0L);
+            IXchg (Reg RAX, RegOffset (0, R12));
+          ])
   | CPrim2 (p2, ex1, ex2, t) -> (
       match p2 with
       | CheckSize -> failwith "no bueno"
@@ -1356,7 +1430,10 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
       @ comp_e1
       @ [ IJmp (Label done_label); ILabel else_label ]
       @ comp_e2 @ [ ILabel done_label ]
-  | CImmExpr imm_e -> [ IMov (Reg RAX, compile_imm imm_e env) ]
+  | CImmExpr imm_e -> (
+      match imm_e with
+      | ImmMutex _ -> [ ICall (Label "_loch_mutex_create") ]
+      | _ -> [ IMov (Reg RAX, compile_imm imm_e env) ])
   | CTuple (exprs, t) ->
       (* allocate the memory and then return the pointer *)
       let name = sprintf "reserve_tuple_%d" t in

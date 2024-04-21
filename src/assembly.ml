@@ -35,6 +35,7 @@ type arg =
 
 type instruction =
   | IMov of arg * arg
+  | IXchg of arg * arg
   | ILea of arg * arg
   | IAdd of arg * arg
   | ISub of arg * arg
