@@ -6,6 +6,16 @@
 #define _XOPEN_SOURCE
 #endif
 
+// TODO: asm level mutex will be implemented as
+// loop:
+//  mov rax, 1
+//  xchg rax, [mutex]
+//  cmp rax, 0
+//  je acquired
+//  call yield(rsp, rbp)
+//  jmp loop
+// acquired:
+//
 #include <stdlib.h>
 
 #include "debug.h"

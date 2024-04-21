@@ -11,7 +11,6 @@
 #define _XOPEN_SOURCE
 #endif
 
-#include "mutex.h"
 #include "tcb.h"
 
 #include <pthread.h>

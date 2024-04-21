@@ -55,7 +55,6 @@ void *loch_runner(void *x) {
   return NULL;
 }
 
-/*
 int main() {
   scheduler = sched_create();
   for (int i = 0; i < NUM_THREADS; i++) {
@@ -77,4 +76,3 @@ int main() {
     pthread_join(threads[i], NULL);
   }
 }
-*/
