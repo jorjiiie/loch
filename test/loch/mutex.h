@@ -15,6 +15,7 @@
 // oh how i would love a namespace
 
 #include <stdatomic.h>
+#include <stdint.h>
 
 // dumbest lock in existence
 typedef struct mutex {
@@ -33,15 +34,5 @@ void mutex_lock(mutex_t *m);
 // unlocks the mutex
 // duh
 void mutex_unlock(mutex_t *m);
-
-// because sometimes we need the spinlock!
-typedef struct spinlock {
-  _Atomic uint32_t lock;
-} spinlock_t;
-
-spinlock_t *spinlock_create();
-void spinlock_destroy(spinlock_t *m);
-void spinlock_lock(spinlock_t *m);
-void spinlock_unlock(spinlock_t *m);
 
 #endif

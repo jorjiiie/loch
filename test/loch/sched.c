@@ -15,11 +15,17 @@
 
 tcb_t *sched_next(sched_t *sched) {
   // except lock this!
-  spinlock_lock(sched->lock);
+  if (pthread_mutex_lock(sched->mutex)) {
+    printlog("pthread_mutex_lock failed");
+    exit(1);
+  }
   node_t *node = sched->head;
-  printd("oh noes %p %d", sched->head, sched->size);
+  printd("oh noes %p %lu", sched->head, sched->size);
   if (node == NULL) {
-    spinlock_unlock(sched->lock);
+    if (pthread_mutex_unlock(sched->mutex)) {
+      printlog("pthread_mutex_unlock failed");
+      exit(1);
+    }
     return NULL;
   }
   tcb_t *tcb = node->tcb;
@@ -28,12 +34,19 @@ tcb_t *sched_next(sched_t *sched) {
   printd("for some reason the next is %p %p", node, sched->head);
   if (sched->head == NULL)
     sched->tail = NULL;
-  spinlock_unlock(sched->lock);
+
+  if (pthread_mutex_unlock(sched->mutex)) {
+    printlog("pthread_mutex_unlock failed");
+    exit(1);
+  }
   return tcb;
 }
 
 void sched_enqueue(sched_t *sched, tcb_t *tcb) {
-  spinlock_lock(sched->lock);
+  if (pthread_mutex_lock(sched->mutex)) {
+    printlog("pthread_mutex_lock failed");
+    exit(1);
+  }
   printd("adding something! %p %p", sched->head, sched->tail);
   node_t *c = sched->head;
   while (c != NULL) {
@@ -47,7 +60,10 @@ void sched_enqueue(sched_t *sched, tcb_t *tcb) {
     sched->head->next = NULL;
     sched->tail = sched->head;
     sched->size++;
-    spinlock_unlock(sched->lock);
+    if (pthread_mutex_unlock(sched->mutex)) {
+      printlog("pthread_mutex_unlock failed");
+      exit(1);
+    }
     return;
   }
 
@@ -58,12 +74,16 @@ void sched_enqueue(sched_t *sched, tcb_t *tcb) {
   sched->tail = n;
   sched->size++;
 
-  spinlock_unlock(sched->lock);
+  if (pthread_mutex_unlock(sched->mutex)) {
+    printlog("pthread_mutex_unlock failed");
+    exit(1);
+  }
 }
 
 sched_t *sched_create() {
   sched_t *sched = (sched_t *)malloc(sizeof(sched_t));
-  sched->lock = spinlock_create();
+  sched->mutex = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
+  pthread_mutex_init(sched->mutex, NULL);
   sched->head = sched->tail = NULL;
   sched->size = 0;
   return sched;

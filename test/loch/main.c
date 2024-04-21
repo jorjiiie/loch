@@ -22,6 +22,8 @@ uint64_t HEAP_SIZE = 0;
 _Atomic uint64_t gc_ack = 0;
 _Atomic uint64_t gc_flag = 0;
 
+_Thread_local thread_state_t state;
+
 uint64_t thread_code_starts_here(uint64_t *heap, uint64_t sz,
                                  uint64_t closure) {
   for (int i = 0; i < 10; i++) {
@@ -35,6 +37,7 @@ uint64_t do_something(uint64_t arg) {
     printf("LOL! %d\n", i);
     usleep(100000); // 1s
   }
+  printd_mt("FINISHED_TASK!");
   return 0;
 }
 
@@ -42,7 +45,6 @@ _Atomic uint64_t active_threads = 0;
 sched_t *scheduler;
 
 _Atomic uint64_t thread_id = 1;
-_Thread_local thread_state_t state;
 
 void *loch_runner(void *x) {
   // initialize thread local stuff
@@ -63,7 +65,7 @@ int main() {
     tcb_t *tcb = tcb_create(0);
     sched_enqueue(scheduler, tcb);
     printd("enqueieng");
-    usleep(3000000);
+    usleep(3000);
   }
   while (sched_size(scheduler)) {
     usleep(1000);

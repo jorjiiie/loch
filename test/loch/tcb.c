@@ -31,7 +31,6 @@ tcb_t *tcb_create(uint64_t closure_ptr) {
               (uint64_t)tcb >> 32, (uint64_t)tcb & 0x00000000ffffffff,
               closure_ptr >> 32, closure_ptr & 0x00000000ffffffff);
 
-  printf("created tcb %p\n", tcb);
   return tcb;
 }
 #endif

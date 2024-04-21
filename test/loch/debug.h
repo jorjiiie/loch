@@ -21,5 +21,19 @@
       fprintf(stderr, "\n");                                                   \
     }                                                                          \
   } while (0)
+#define printd_mt(fmt, ...)                                                    \
+  do {                                                                         \
+    if (DEBUG_LOG) {                                                           \
+      fprintf(stderr, "%s:%d:%s():thread_%llu: " fmt, __FILE__, __LINE__,      \
+              __func__, state.thread_id, ##__VA_ARGS__);                       \
+      fprintf(stderr, "\n");                                                   \
+    }                                                                          \
+  } while (0)
+#define printlog(fmt, ...)                                                     \
+  do {                                                                         \
+    fprintf(stderr, "%s:%d:%s(): " fmt, __FILE__, __LINE__, __func__,          \
+            ##__VA_ARGS__);                                                    \
+    fprintf(stderr, "\n");                                                     \
+  } while (0)
 
 #endif

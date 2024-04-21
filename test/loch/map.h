@@ -14,20 +14,31 @@
 #include "mutex.h"
 #include "tcb.h"
 
+#include <pthread.h>
+#include <stddef.h>
+#include <stdint.h>
+
 typedef struct kv {
   uint64_t key;
   tcb_t *value;
   struct kv *next;
 } kv_t;
 
-#define MAP_SIZE 4096
-#define NUM_LOCKS 64
+#define MAP_SIZE 1024
+#define NUM_LOCKS 2
 
 // hash function is the brilliant identity
 typedef struct map {
   kv_t *table[MAP_SIZE];
-  int size;
+  _Atomic size_t size;
+
+// and so it begins
+#ifdef LOCH_RUNTIME
   mutex_t *locks[NUM_LOCKS];
+#else
+  pthread_mutex_t locks[NUM_LOCKS];
+#endif
+
 } map_t;
 
 // creates a map. duh! ready to be used

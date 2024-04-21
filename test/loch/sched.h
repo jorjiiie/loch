@@ -6,6 +6,7 @@
 #define _XOPEN_SOURCE
 #endif
 
+#include <pthread.h>
 #include <stddef.h>
 
 typedef struct tcb tcb_t;
@@ -18,7 +19,7 @@ typedef struct node {
 } node_t;
 
 typedef struct sched {
-  spinlock_t *lock;
+  pthread_mutex_t *mutex;
   node_t *head;
   node_t *tail;
   size_t size;
