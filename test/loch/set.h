@@ -5,7 +5,7 @@
  */
 #pragma once
 #ifndef SET_H
-#define SET_H
+#define SET_H 600
 
 #ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE

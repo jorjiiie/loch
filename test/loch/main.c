@@ -1,5 +1,5 @@
 #ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE
+#define _XOPEN_SOURCE 600
 #endif
 
 #include "gc.h"
@@ -353,7 +353,7 @@ int main(int argc, char **argv) {
     tcb_t *tcb = tcb_create(i);
     sched_enqueue(scheduler, tcb);
     printlog("enqueue!");
-    usleep(30000);
+    // usleep(30000);
   }
   SNAKEVAL result;
   // slight problem of what the main thread does - probably just fake a

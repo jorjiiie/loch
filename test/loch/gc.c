@@ -1,9 +1,8 @@
 #ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE
-#include <complex.h>
-#include <stdatomic.h>
+#define _XOPEN_SOURCE 600
 #endif
 
+#include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,10 +41,9 @@ extern _Thread_local thread_state_t state;
 gc_t *gc_init(uint64_t heap_size) {
   gc_t *gc = malloc(sizeof(gc_t));
   gc->HEAP_SIZE = heap_size;
-  gc->heap_start = mmap(NULL, heap_size, PROT_READ | PROT_WRITE,
-                        MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-  if (gc->heap_start == MAP_FAILED) {
-    perror("mmap");
+  gc->heap_start = calloc(heap_size, 1);
+  if (gc->heap_start == NULL) {
+    perror("calloc");
     exit(1);
   }
   gc->heap_end = gc->heap_start + heap_size;
@@ -186,12 +184,11 @@ uint64_t *reserve(uint64_t wanted, uint64_t *rsp, uint64_t *rbp) {
     // all threads are waiting, go GC
 
     set_clear(gc_state->seen_threads);
-    uint64_t *new_heap = mmap(NULL, gc_state->HEAP_SIZE, PROT_READ | PROT_WRITE,
-                              MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    uint64_t *new_heap = calloc(gc_state->HEAP_SIZE,1);
     uint64_t *new_ptr =
         gc(gc_state->heap_start, new_heap, new_heap + gc_state->HEAP_SIZE);
 
-    munmap(gc_state->heap_start, gc_state->HEAP_SIZE);
+    free(gc_state->heap_start);
 
     // i am not going to both clearing everyone out
     if (new_ptr + wanted > (new_heap + gc_state->HEAP_SIZE)) {

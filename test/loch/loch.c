@@ -3,7 +3,7 @@
  * implementation of the threading runtime
  */
 #ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE
+#define _XOPEN_SOURCE 600
 #endif
 
 #include "loch.h"
