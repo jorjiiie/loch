@@ -35,5 +35,7 @@ int set_contains(set_t* set, uint64_t val);
 // puts into a set. if collisions, whatever
 void set_put(set_t *map, uint64_t key);
 
+void set_clear(set_t *set);
+
 // don't think i need set erase
 #endif

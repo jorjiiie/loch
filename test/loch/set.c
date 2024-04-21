@@ -23,6 +23,9 @@ void set_insert(set_t *set, uint64_t val) {
   size_t bucket = val & (SET_SIZE - 1);
   size_t i = 0;
   while (set->occupied[bucket]) {
+      if (set->items[bucket] == val) {
+          return;
+      }
       i++;
       bucket = (bucket + i) & (SET_SIZE - 1);
   }
