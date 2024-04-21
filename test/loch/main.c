@@ -12,7 +12,6 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/mman.h>
 #include <unistd.h>
 
 // number of threads to execute snake code with
@@ -294,7 +293,7 @@ void error(uint64_t code, SNAKEVAL val) {
                                         // setters for lock reasons
   fflush(stdout);
 skip_print:
-  munmap(gc_state->heap_start, gc_state->HEAP_SIZE);
+  free(gc_state->heap_start);
   exit(code);
 }
 
@@ -308,9 +307,9 @@ void *loch_runner(void *x) {
 }
 uint64_t do_something(uint64_t arg) {
   for (int i = 0; i < 5; i++) {
-    printf("LOL! %d\n", i);
+    //printf("LOL! %d\n", i);
 
-    usleep(50000); // 1s
+    //usleep(5000); // 1s
     runtime_yield();
   }
   printd_mt("FINISHED_TASK!");
@@ -320,6 +319,7 @@ uint64_t do_something(uint64_t arg) {
 void loch_setup(void) {
   scheduler = sched_create();
   atomic_store(&halt_flag, 0);
+
 
   for (int i = 0; i < NUM_THREADS; i++) {
     pthread_create(&threads[i], NULL, loch_runner, NULL);
@@ -347,9 +347,10 @@ int main(int argc, char **argv) {
   uint64_t *aligned = (uint64_t *)(((uint64_t)gc_state->heap_ptr + 15) & ~0xF);
   gc_state->heap_end = aligned + HEAP_SIZE;
 
+
   loch_setup();
 
-  for (int i = 0; i < 20; i++) {
+  for (int i = 0; i < 2000; i++) {
     tcb_t *tcb = tcb_create(i);
     sched_enqueue(scheduler, tcb);
     printlog("enqueue!");
@@ -371,6 +372,6 @@ int main(int argc, char **argv) {
 
   print(result);
 
-  munmap(gc_state->heap_start, gc_state->HEAP_SIZE);
+  free(gc_state->heap_start);
   return 0;
 }
