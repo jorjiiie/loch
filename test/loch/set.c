@@ -1,6 +1,6 @@
 /*
  * set.c
- * impl. quadratic probing hash table!
+ *  quadratic probing integer table!
  */
 
 #ifndef _XOPEN_SOURCE
@@ -49,4 +49,12 @@ int set_contains(set_t *set, uint64_t val) {
         bucket = (bucket + i) & (SET_SIZE - 1);
     }
     return 0;
+}
+
+void set_dump(set_t *set) {
+    for (int i = 0; i < SET_SIZE; i++) {
+        if (set->occupied[i]) {
+            printf("%llu\n", set->items[i]);
+        }
+    }
 }

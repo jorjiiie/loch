@@ -103,7 +103,7 @@ uint64_t *copy_if_needed(uint64_t *addr, uint64_t *heap) {
       *addr = (uint64_t)(new_ptr) + LOCK_TAG;
   } else if ((v & THREAD_TAG_MASK) == THREAD_TAG) {
       uint64_t tid = v - THREAD_TAG;
-      set_put(seen_threads, tid);
+      set_insert(seen_threads, tid);
   }
 
   // forwarding pointer alternatively?
