@@ -359,6 +359,7 @@ int main(int argc, char **argv) {
   while (sched_size(scheduler) || atomic_load(&gc_state->active_threads) != 0) {
     usleep(1000);
   }
+  loch_teardown();
 
   print(result);
 
