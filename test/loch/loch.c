@@ -145,7 +145,7 @@ void check_for_work() {
   while (1) {
     tcb_t *tcb = sched_next(scheduler);
     if (tcb == NULL) {
-      printd("no work to do!");
+      printd_mt("no work to do!");
       usleep(100000);
     } else {
       atomic_store(&tcb->state, RUNNING);

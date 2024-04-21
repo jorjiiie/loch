@@ -15,7 +15,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-// number of threads NOT counting the main thread
+// number of threads to execute snake code with
 #define NUM_THREADS 7
 
 typedef uint64_t SNAKEVAL;
@@ -23,7 +23,7 @@ typedef uint64_t SNAKEVAL;
 extern SNAKEVAL our_code_starts_here() asm("our_code_starts_here");
 extern SNAKEVAL
 thread_code_starts_here(SNAKEVAL closure) asm("thread_code_starts_here");
-extern void error() asm("error");
+extern void error(uint64_t, uint64_t) asm("error");
 extern SNAKEVAL
 set_stack_bottom(uint64_t *stack_bottom) asm("set_stack_bottom");
 extern SNAKEVAL print(SNAKEVAL val) asm("print");
@@ -70,11 +70,18 @@ const error_code_t INDEX_TOO_LARGE = 12;
 const error_code_t WANT_TUPLE_GOT_NIL = 13;
 const error_code_t ERR_CALL_NOT_CLOSURE = 14;
 const error_code_t ERR_CALL_ARITY_ERR = 15;
+const error_code_t EXPECTED_LOCK_LOCK = 16;
+const error_code_t EXPECTED_LOCK_UNLOCK = 17;
+const error_code_t EXPECTED_LOCK_SCOPED = 18;
+const error_code_t EXPECTED_LAMBDA_SCOPED = 19;
+const error_code_t EXPECTED_LAMBDA_THREAD = 20;
+const error_code_t EXPECTED_THREAD_START = 21;
+const error_code_t EXPECTED_THREAD_GET = 22;
 
 // state stuff
 gc_t *gc_state;
 _Thread_local thread_state_t state;
-_Atomic uint64_t thread_id = 0;
+_Atomic uint64_t thread_id = 1;
 _Atomic uint8_t halt_flag = 0;
 sched_t *scheduler;
 
@@ -300,10 +307,10 @@ void *loch_runner(void *x) {
   return NULL;
 }
 uint64_t do_something(uint64_t arg) {
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < 5; i++) {
     printf("LOL! %d\n", i);
 
-    usleep(100000); // 1s
+    usleep(50000); // 1s
     runtime_yield();
   }
   printd_mt("FINISHED_TASK!");
@@ -317,6 +324,7 @@ void loch_setup(void) {
   for (int i = 0; i < NUM_THREADS; i++) {
     pthread_create(&threads[i], NULL, loch_runner, NULL);
   }
+  state.thread_id = 0; // main thread
 }
 
 void loch_teardown() {
@@ -341,11 +349,11 @@ int main(int argc, char **argv) {
 
   loch_setup();
 
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < 20; i++) {
     tcb_t *tcb = tcb_create(i);
     sched_enqueue(scheduler, tcb);
     printlog("enqueue!");
-    usleep(300000);
+    usleep(30000);
   }
   SNAKEVAL result;
   // slight problem of what the main thread does - probably just fake a
