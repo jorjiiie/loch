@@ -11,20 +11,30 @@
 #include <stdatomic.h>
 
 #include "tcb.h"
-#include "map.h"
+
+typedef struct map map_t;
+typedef struct set set_t;
 
 typedef struct gc_state {
-    pthread_mutex_t lock;
+    // normal gc info
     uint64_t *heap_start;
     uint64_t *heap_end;
     uint64_t *heap_ptr;
     uint64_t HEAP_SIZE;
 
-    // contains ALL threads
-    map_t *map;
+    // concurrency info
+    pthread_mutex_t lock;
     _Atomic uint64_t active_threads;
     _Atomic uint64_t gc_ack;
     atomic_flag gc_flag;
+
+
+    // map of all the threads to walk through, also to free
+    // when we're done.
+    map_t *map;
+    set_t *seen_threads;
+
+
 } gc_t;
 
 gc_t *gc_init(uint64_t heap_size);

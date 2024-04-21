@@ -13,6 +13,7 @@
 #include "gc.h"
 #include "loch.h"
 #include "set.h"
+#include "map.h"
 
 // constants
 extern uint64_t NUM_TAG_MASK;
@@ -38,8 +39,29 @@ extern uint64_t *TO_E;
 extern gc_t *gc_state;
 extern _Thread_local thread_state_t state;
 
-set_t *seen_threads;
+gc_t *gc_init(uint64_t heap_size) {
+    gc_t *gc = malloc(sizeof(gc_t));
+    gc->HEAP_SIZE = heap_size;
+    gc->heap_start = mmap(NULL, heap_size, PROT_READ | PROT_WRITE,
+                    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (gc->heap_start == MAP_FAILED) {
+        perror("mmap");
+        exit(1);
+    }
+    gc->heap_end = gc->heap_start + heap_size;
+    gc->heap_ptr = gc->heap_start;
 
+    pthread_mutex_init(&gc->lock, NULL);
+
+    gc->active_threads = 0;
+    gc->gc_ack = 0;
+    atomic_flag_clear(&gc->gc_flag);
+
+    gc->map = map_create();
+    gc->seen_threads = set_create();
+
+    return gc;
+}
 uint64_t *copy_if_needed(uint64_t *addr, uint64_t *heap) {
 
   uint64_t v = *addr;
@@ -90,23 +112,23 @@ uint64_t *copy_if_needed(uint64_t *addr, uint64_t *heap) {
     }
     *addr = (uint64_t)(new_ptr) + CLOSURE_TAG;
   } else if ((v & LOCK_TAG_MASK) == LOCK_TAG) {
-      uint64_t *ptr = (uint64_t *)(v - CLOSURE_TAG);
-      if ((ptr[0] & FORWARDING_TAG_MASK) == FORWARDING_TAG) {
-        *addr = ptr[0] - FORWARDING_TAG + CLOSURE_TAG;
-        return heap;
-      }
-      uint64_t *new_ptr = heap;
-      heap += 2;
-      new_ptr[0] = ptr[0]; // 0 or 1 LOL
-      ptr[0] = (uint64_t)(new_ptr) + FORWARDING_TAG;
+    uint64_t *ptr = (uint64_t *)(v - CLOSURE_TAG);
+    if ((ptr[0] & FORWARDING_TAG_MASK) == FORWARDING_TAG) {
+      *addr = ptr[0] - FORWARDING_TAG + CLOSURE_TAG;
+      return heap;
+    }
+    uint64_t *new_ptr = heap;
+    heap += 2;
+    new_ptr[0] = ptr[0]; // 0 or 1 LOL
+    ptr[0] = (uint64_t)(new_ptr) + FORWARDING_TAG;
 
-      *addr = (uint64_t)(new_ptr) + LOCK_TAG;
+    *addr = (uint64_t)(new_ptr) + LOCK_TAG;
   } else if ((v & THREAD_TAG_MASK) == THREAD_TAG) {
-      uint64_t tid = v - THREAD_TAG;
-      set_insert(seen_threads, tid);
+    // no gc needed except the fact that we have seen these buddies
+    uint64_t tid = v - THREAD_TAG;
+    set_insert(gc_state->seen_threads, tid);
   }
 
-  // forwarding pointer alternatively?
   return heap;
 }
 
@@ -161,6 +183,7 @@ uint64_t *reserve(uint64_t wanted, uint64_t *rsp, uint64_t *rbp) {
     }
     // all threads are waiting, go GC
 
+    set_clear(gc_state->seen_threads);
     uint64_t *new_heap = mmap(NULL, gc_state->HEAP_SIZE, PROT_READ | PROT_WRITE,
                               MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     uint64_t *new_ptr =
@@ -173,6 +196,8 @@ uint64_t *reserve(uint64_t wanted, uint64_t *rsp, uint64_t *rbp) {
       fprintf(stderr, "gc failed to allocate enough memory\n");
       exit(1);
     }
+    // thread cleanup
+
 
     gc_state->heap_start = new_heap;
     gc_state->heap_ptr = new_ptr;
