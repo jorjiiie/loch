@@ -345,7 +345,7 @@ int main(int argc, char **argv) {
     tcb_t *tcb = tcb_create(i);
     sched_enqueue(scheduler, tcb);
     printlog("enqueue!");
-    usleep(3000);
+    usleep(300000);
   }
   SNAKEVAL result;
   // slight problem of what the main thread does - probably just fake a

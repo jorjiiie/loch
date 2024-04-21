@@ -96,7 +96,6 @@ void runtime_yield() {
 
   printd_mt("be4 STATE %p %p %p", &state, state.current_context,
             state.next_context);
-
   // swap to the other thread
   swapcontext(&state.current_context->ctx, &state.next_context->ctx);
 
