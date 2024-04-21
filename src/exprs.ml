@@ -7,7 +7,7 @@ let debug_printf fmt =
 
 type tag = int
 type sourcespan = Lexing.position * Lexing.position
-type prim1 = Add1 | Sub1 | Print | IsBool | IsNum | IsTuple | Not | PrintStack | Thread | Get | Start
+type prim1 = Add1 | Sub1 | Print | IsBool | IsNum | IsTuple | Not | PrintStack | Thread | Get | Start | Mutex | Lock | Unlock | ScopedLock
 
 type prim2 =
   | Plus

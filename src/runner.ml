@@ -306,7 +306,7 @@ let test_doesnt_run filename test_ctxt =
   | Error _ -> assert_bool (sprintf "Program %s currently fails (as expected for now)" filename) true
 
 
-let test_doesnt_err filename test_ctxt =
+let test_doesnt_err filename _ =
   let filename = Filename.remove_extension filename in
   let progfile = sprintf "input/dont_err/%s.loch" filename in
   let argsfile = sprintf "input/dont_err/%s.args" filename in

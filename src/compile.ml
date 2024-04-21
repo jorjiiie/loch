@@ -1201,7 +1201,11 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
       | PrintStack -> failwith "not implemented in loch :c"
       | Thread -> failwith "thread not implemented yet"
       | Get -> failwith "get not implemented yet"
-      | Start -> failwith "start not implemented yet")
+      | Start -> failwith "start not implemented yet"
+      | Mutex -> failwith "mutex not implemented yet"
+      | Lock -> failwith "lock not implemented yet"
+      | Unlock -> failwith "unlock not implemented yet"
+      | ScopedLock -> failwith "scopedlock not implemented yet")
   | CPrim2 (p2, ex1, ex2, t) -> (
       match p2 with
       | CheckSize -> failwith "no bueno"

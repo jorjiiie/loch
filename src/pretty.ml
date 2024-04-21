@@ -22,6 +22,10 @@ let string_of_op1 op =
   | Thread -> "thread"
   | Get -> "get"
   | Start -> "start"
+  | Mutex -> "mutex"
+  | Lock -> "lock"
+  | Unlock -> "unlock"
+  | ScopedLock -> "scopedlock"
 
 let name_of_op1 op =
   match op with
@@ -36,6 +40,10 @@ let name_of_op1 op =
   | Thread -> "Thread"
   | Get -> "Get"
   | Start -> "Start"
+  | Mutex -> "Mutex"
+  | Lock -> "Lock"
+  | Unlock -> "Unlock"
+  | ScopedLock -> "ScopedLock"
 
 let string_of_op2 op =
   match op with
@@ -90,9 +98,9 @@ and string_of_expr_with (depth : int) (print_a : 'a -> string) (e : 'a expr) :
   if depth <= 0 then "..."
   else
     match e with
-    | ESeq (e1, e2, a) -> string_of_expr e1 ^ "; " ^ string_of_expr e2
+    | ESeq (e1, e2, _) -> string_of_expr e1 ^ "; " ^ string_of_expr e2
     | ETuple ([ e ], a) -> "(" ^ string_of_expr e ^ ",)" ^ print_a a
-    | ETuple (exprs, a) ->
+    | ETuple (exprs, _) ->
         "(" ^ ExtString.String.join ", " (List.map string_of_expr exprs) ^ ")"
     | EGetItem (e, idx, a) ->
         sprintf "%s[%s]%s" (string_of_expr e) (string_of_expr idx) (print_a a)
@@ -491,7 +499,7 @@ let format_declgroup (fmt : Format.formatter) (print_a : 'a -> string)
 let format_program (fmt : Format.formatter) (print_a : 'a -> string)
     (p : 'a program) : unit =
   match p with
-  | Program (decls, body, a) ->
+  | Program (decls, body, _) ->
       print_list fmt
         (fun fmt -> format_declgroup fmt print_a)
         decls
