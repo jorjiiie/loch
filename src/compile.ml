@@ -1219,7 +1219,7 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
             ICmp (Reg RAX, Const closure_tag);
             IJne (Label "want_closure_thread");
             IMov (Reg RDI, Reg RAX);
-            ICall (Label "_loch_thread");
+            ICall (Label "_loch_thread_create");
             IAdd (Reg RAX, Const thread_tag);
           ]
       | Get ->
@@ -1234,7 +1234,7 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
             IMov (Reg RDI, Reg RAX);
             IMov (Reg RSI, Reg RBP);
             IMov (Reg RDX, Reg RSP);
-            ICall (Label "_loch_get");
+            ICall (Label "_loch_thread_get");
           ]
       | Start ->
           (* doesn't block*)
@@ -1246,7 +1246,7 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
             ICmp (Reg RAX, Const thread_tag);
             IJne (Label "want_thread_start");
             IMov (Reg RDI, Reg RAX);
-            ICall (Label "_loch_start");
+            ICall (Label "_loch_thread_start");
           ]
       | Lock ->
           (* absolutely blocks*)
@@ -1539,9 +1539,10 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
           | _ -> failwith "fhck ")
       | Snake -> compile_fun name args env
       | Prim -> failwith "feels like this isn't supposed to be here"
-      | Unknown -> failwith "Unknown function call type")
+      | _ -> failwith "fhck")
   | CLambda _ -> compile_clambda e envs ftag false
   | CMutex _ -> [ ICall (Label "_loch_mutex_create") ]
+(* TODO: NOT THIS*)
 
 and compile_imm (e : tag immexpr) env =
   match e with
@@ -1633,6 +1634,11 @@ let compile_prog ((anfed : tag aprogram), (env : arg envt envt)) : string =
          extern input\n\
          extern try_gc\n\
          extern naive_print_heap\n\
+         extern _loch_thread_create\n\
+         extern _loch_thread_get\n\
+         extern _loch_thread_start\n\
+         extern _loch_yield\n\
+         extern _loch_set_stack\n\
          extern HEAP\n\
          extern HEAP_END\n\
          extern set_stack_bottom\n\
