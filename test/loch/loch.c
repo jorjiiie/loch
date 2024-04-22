@@ -8,12 +8,14 @@
 
 #include "loch.h"
 #include "gc.h"
+#include "map.h"
 #include "sched.h"
 #include "tcb.h"
 
 // pass it as a compile flag -DDEBUG_LOG
 #include "debug.h"
 
+#include <stdlib.h>
 #include <unistd.h>
 
 extern uint64_t
@@ -49,7 +51,6 @@ void tcb_runner(uint32_t tcb_high, uint32_t tcb_low, uint32_t closure_high,
     state.current_context = state.next_context;
     state.next_context = NULL;
   }
-  printf("lol tcb? %p\n", tcb);
   // uint64_t ret = thread_code_starts_here(heap_ptr, HEAP_SIZE, arg);
   uint64_t ret = do_something(arg);
   tcb->result = ret;
@@ -65,80 +66,48 @@ uint64_t tcb_set_stack_bottom(uint64_t *stack_bottom) {
   return 0;
 }
 
-// i think this all should be in loch
-
-// maybe this should return R15 no. reserve is a C call that RESERVES and
-// returns the pointer such [p,p+s) is reserved (reimplemented malloc)
-void loch_yield(uint64_t *rbp, uint64_t *rsp) {
-  printd("yield from loch! %p %p", rbp, rsp);
-
-  state.current_context->frame_bottom = rbp;
-  state.current_context->frame_top = rsp;
-
-  // for thread to GC, we must have THREADS - 1 ack's
-  // although this MUST work for the number of running threads!
-  // check if GC is necessary
-  // we do we yield in here? because why not?
-  // it doesn't matter.
-  atomic_fetch_add(&gc_state->gc_ack, 1);
-  while (atomic_load(&gc_state->gc_flag) == 1) {
-    usleep(10);
-  }
-  atomic_fetch_sub(&gc_state->gc_ack, 1);
-  runtime_yield();
-}
 void runtime_yield() {
+
+  assert(state.current_context != NULL);
+  assert(atomic_load(&state.current_context->state) == RUNNING);
   state.next_context = sched_next(scheduler);
 
   // no other threads, just continue
   if (state.next_context == NULL)
     return;
 
+  /*
   printd_mt("be4 STATE %p %p %p", &state, state.current_context,
             state.next_context);
+  */
+
+  thread_state_t *t = &state;
   // swap to the other thread
   swapcontext(&state.current_context->ctx, &state.next_context->ctx);
 
+  /*
   printd_mt("AFTER STATE %p %p %p", &state, state.current_context,
             state.next_context);
-  // we are now in state.next_context
-  // although not strictly true, since this could have resumed from somewhere
-  // else. as in, someone finishes, we go to wait, then we resume here.
-  atomic_store(&state.current_context->state, NOT_RUNNING);
+  */
+
+  // we either come from the above (swapcontext) or we have just resumed an old
+  // thread from check_for_work()
   if (state.next_context == NULL) {
-    // return from finish
+    // do NOT do the below
+    return;
+  }
+  if (state.next_context == NULL) {
     // do NOT do the below
     return;
   }
 
+  atomic_store(&state.current_context->state, NOT_RUNNING);
   atomic_store(&state.next_context->state, RUNNING);
 
-  // AFTER we switch contexts! my face when multithreading
-  // i think we should put this before the swap LOL
-  // wait holy hell - needs to be a locked operation
   sched_enqueue(scheduler, state.current_context);
 
   state.current_context = state.next_context;
   state.next_context = NULL;
-}
-
-uint64_t spawn_thread(uint64_t closure) {
-  uint64_t tid = atomic_fetch_add(&thread_id, 1);
-  tcb_t *new_tcb = tcb_create(closure);
-  // add tcb stuff around
-  // TODO: fix this up for all the tracking stuff
-
-  // tag with thread tag
-  return tid << 4 | 0x13;
-}
-
-uint64_t loch_get(uint64_t loch_tcb) {
-  // TODO: get the TCB somehow. I don't want to throw pointers around.
-  tcb_t *tcb;
-  while (atomic_load(&tcb->state) != FINISHED) {
-    runtime_yield();
-  }
-  return tcb->result;
 }
 
 void check_for_work() {
@@ -162,4 +131,61 @@ void check_for_work() {
   }
 }
 
-void thread_func() {}
+uint64_t _loch_yield(uint64_t *rbp, uint64_t *rsp) {
+  printd("yield from loch! %p %p", rbp, rsp);
+
+  state.current_context->frame_bottom = rbp;
+  state.current_context->frame_top = rsp;
+
+  // for thread to GC, we must have THREADS - 1 ack's
+  // although this MUST work for the number of running threads!
+  // check if GC is necessary
+  // we do we yield in here? because why not?
+  // it doesn't matter.
+  atomic_fetch_add(&gc_state->gc_ack, 1);
+  while (atomic_load(&gc_state->gc_flag) == 1) {
+    usleep(100);
+  }
+  atomic_fetch_sub(&gc_state->gc_ack, 1);
+  runtime_yield();
+  return 0; // this does in fact mess up RAX!
+}
+
+uint64_t _loch_thread_create(uint64_t closure) {
+  tcb_t *tcb = tcb_create(closure);
+  uint64_t t_id = atomic_fetch_add(&thread_id, 1);
+  map_put(gc_state->map, t_id, tcb);
+  return t_id;
+}
+
+uint64_t _loch_thread_get(uint64_t thread, uint64_t *rbp, uint64_t *rsp) {
+  tcb_t *tcb = map_get(gc_state->map, thread);
+  if (tcb == NULL) {
+    perror("invalid tcb!");
+    exit(1);
+  }
+  tcb->frame_bottom = rbp;
+  tcb->frame_top = rsp;
+
+  // switch contexts
+  while (atomic_load(&tcb->state) != FINISHED) {
+    runtime_yield();
+  }
+  return tcb->result;
+}
+
+uint64_t _loch_thread_start(uint64_t thread) {
+  tcb_t *tcb = map_get(gc_state->map, thread);
+  if (tcb == NULL) {
+    perror("invalid tcb!");
+    exit(1);
+  }
+  sched_enqueue(scheduler, tcb);
+  return thread;
+}
+
+uint64_t _lock_set_stack(uint64_t *bottom) {
+  tcb_t *current = state.current_context;
+  current->stack_bottom = bottom;
+  return 0;
+}

@@ -1,7 +1,7 @@
 TARGET = a.out
 CC = clang
 SOURCES = gc.c loch.c main.c map.c sched.c set.c tcb.c
-CFLAGS = -Wshadow -g -DDEBUG
+CFLAGS = -Wshadow -g  -DDEBUG -arch x86_64 
 all: $(TARGET)
 
 

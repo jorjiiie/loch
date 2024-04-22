@@ -15,7 +15,7 @@
 #include <unistd.h>
 
 // number of threads to execute snake code with
-#define NUM_THREADS 7
+#define NUM_THREADS 8
 
 typedef uint64_t SNAKEVAL;
 
@@ -33,6 +33,18 @@ extern SNAKEVAL equal(SNAKEVAL val1, SNAKEVAL val2) asm("equal");
 extern uint64_t *try_gc(uint64_t *alloc_ptr, uint64_t amount_needed,
                         uint64_t *first_frame,
                         uint64_t *stack_top) asm("try_gc");
+
+extern uint64_t _loch_yield(uint64_t *rbp, uint64_t *rsp) asm("_loch_yield");
+
+extern uint64_t
+_loch_thread_create(uint64_t closure) asm("_loch_thread_create");
+
+extern uint64_t _loch_thread_get(uint64_t thread, uint64_t *rbp,
+                                 uint64_t *rsp) asm("_loch_thread_get");
+
+extern uint64_t _loch_thread_start(uint64_t thread) asm("_loch_thread_start");
+
+extern uint64_t _lock_set_stack(uint64_t *bottom) asm("_lock_set_stack");
 
 const uint64_t NUM_TAG_MASK = 0x0000000000000001;
 const uint64_t BOOL_TAG_MASK = 0x000000000000000f;
@@ -305,11 +317,16 @@ void *loch_runner(void *x) {
   check_for_work();
   return NULL;
 }
+_Atomic uint64_t gg = 0;
+#define NUM_TASK 500
+_Atomic(int) cnt[NUM_TASK];
 uint64_t do_something(uint64_t arg) {
-  for (int i = 0; i < 5; i++) {
-    //printf("LOL! %d\n", i);
+  for (int i = 0; i < 2; i++) {
+    // printf("LOL! %d %llu\n", i, arg);
 
-    //usleep(5000); // 1s
+    cnt[arg]++;
+    gg++;
+    // usleep(50000); // 1s
     runtime_yield();
   }
   printd_mt("FINISHED_TASK!");
@@ -319,7 +336,6 @@ uint64_t do_something(uint64_t arg) {
 void loch_setup(void) {
   scheduler = sched_create();
   atomic_store(&halt_flag, 0);
-
 
   for (int i = 0; i < NUM_THREADS; i++) {
     pthread_create(&threads[i], NULL, loch_runner, NULL);
@@ -347,10 +363,9 @@ int main(int argc, char **argv) {
   uint64_t *aligned = (uint64_t *)(((uint64_t)gc_state->heap_ptr + 15) & ~0xF);
   gc_state->heap_end = aligned + HEAP_SIZE;
 
-
   loch_setup();
 
-  for (int i = 0; i < 2000; i++) {
+  for (int i = 0; i < NUM_TASK; i++) {
     tcb_t *tcb = tcb_create(i);
     sched_enqueue(scheduler, tcb);
     printlog("enqueue!");
@@ -369,6 +384,12 @@ int main(int argc, char **argv) {
     usleep(1000);
   }
   loch_teardown();
+  printlog("okay %llu", atomic_load(&gg));
+  for (int i = 0; i < NUM_TASK; i++) {
+    if (cnt[i] != 2) {
+      printlog("ERROR %d %d", i, cnt[i]);
+    }
+  }
 
   print(result);
 
