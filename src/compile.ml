@@ -67,8 +67,13 @@ let err_SET_NOT_TUPLE = 12L
 let err_SET_LOW_INDEX = 13L
 let err_SET_NOT_NUM = 14L
 let err_SET_HIGH_INDEX = 15L
-let err_CALL_NOT_CLOSURE = 16L
-let err_CALL_ARITY_ERR = 17L
+let err_EXPECTED_LOCK_LOCK = 16
+let err_EXPECTED_LOCK_UNLOCK = 17
+let err_EXPECTED_LOCK_SCOPED = 18
+let err_EXPECTED_LAMBDA_SCOPED = 19
+let err_EXPECTED_LAMBDA_THREAD = 20
+let err_EXPECTED_THREAD_START = 21
+let err_EXPECTED_THREAD_GET = 22
 let first_six_args_registers = [ RDI; RSI; RDX; RCX; R8; R9 ]
 let heap_reg = R15
 let scratch_reg = R12 (* callee saved! *)
@@ -1698,6 +1703,36 @@ let compile_prog ((anfed : tag aprogram), (env : arg envt envt)) : string =
             IMov (Reg RDI, Const 15L);
             IMov (Reg RSI, Reg RAX);
             ICall (Label "error");
+            ILabel "want_mutex_lock";
+            IMov (Reg RDI, Const 16L);
+            IMov (Reg RSI, Reg RAX);
+            ICall (Label "error");
+            ILabel "want_mutex_unlock";
+            IMov (Reg RDI, Const 17L);
+            IMov (Reg RSI, Reg RAX);
+            ICall (Label "error");
+            ILabel "want_mutex_scoped";
+            IMov (Reg RDI, Const 18L);
+            IMov (Reg RSI, Reg RAX);
+            ICall (Label "error");
+            ILabel "want_lambda_scoped";
+            IMov (Reg RDI, Const 19L);
+            IMov (Reg RSI, Reg RAX);
+            ICall (Label "error");
+            ILabel "want_closure_thread";
+            IMov (Reg RDI, Const 20L);
+            IMov (Reg RSI, Reg RAX);
+            ICall (Label "error");
+            ILabel "want_thread_start";
+            IMov (Reg RDI, Const 21L);
+            IMov (Reg RSI, Reg RAX);
+            ICall (Label "error");
+            ILabel "want_thread_get";
+            IMov (Reg RDI, Const 22L);
+            IMov (Reg RSI, Reg RAX);
+            ICall (Label "error");
+
+
           ]
       in
       let main =

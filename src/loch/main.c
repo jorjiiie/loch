@@ -163,7 +163,7 @@ uint64_t *reserve(uint64_t wanted, uint64_t *rbp, uint64_t *rsp) {
 
   atomic_fetch_sub(&gc_state->gc_ack, 1);
   printlog("returning %p", ret);
-  naive_print_heap(gc_state->heap_start, gc_state->heap_end);
+  // naive_print_heap(gc_state->heap_start, gc_state->heap_end);
 
   if (pthread_mutex_unlock(&gc_state->lock)) {
     perror("pthread_mutex_unlock");
@@ -375,14 +375,14 @@ void error(uint64_t code, SNAKEVAL val) {
   printHelp(stderr, val);
   fprintf(stderr, "\n");
   fflush(stderr);
-  naive_print_heap(gc_state->heap_ptr,
-                   gc_state->heap_end); // you really want to do getters and
+  // naive_print_heap(gc_state->heap_ptr,
+  //                  gc_state->heap_end); // you really want to do getters and
                                         // setters for lock reasons
   fflush(stdout);
 skip_print:
 printlog("gc pointers are %p %p", gc_state->heap_start, gc_state->heap_end);
 
-naive_print_heap(gc_state->heap_start, gc_state->heap_end);
+// naive_print_heap(gc_state->heap_start, gc_state->heap_end);
 
   free(gc_state->heap_start);
   exit(code);
@@ -469,7 +469,7 @@ int main(int argc, char **argv) {
   uint64_t result = global_ans;
   printlog("gc pointers are %p %p", gc_state->heap_start, gc_state->heap_end);
 
-  naive_print_heap(gc_state->heap_start, gc_state->heap_end);
+  // naive_print_heap(gc_state->heap_start, gc_state->heap_end);
   print(result);
 
 

@@ -86,7 +86,7 @@ void runtime_yield() {
   swapcontext(&state.current_context->ctx, &state.next_context->ctx);
 
   /*
-  printd_mt("AFTER STATE %p %p %p", &state, state.current_context,
+  printd_mt("  STATE %p %p %p", &state, state.current_context,
             state.next_context);
   */
 

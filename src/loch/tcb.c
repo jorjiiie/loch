@@ -19,8 +19,7 @@ tcb_t *tcb_create(uint64_t closure_ptr) {
 
   getcontext(&tcb->ctx);
   tcb->ctx.uc_stack.ss_sp = calloc(LOCH_STACK_SIZE, 1);
-  //tcb->ctx.uc_stack.ss_sp = mmap(NULL, LOCH_STACK_SIZE, PROT_READ | PROT_WRITE,
-    //                              MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
   if (tcb->ctx.uc_stack.ss_sp == NULL) {
     perror("calloc");
     exit(1);

@@ -39,10 +39,6 @@ uint64_t tcb_set_stack_bottom(uint64_t *stack_bottom);
 // yield from inside the runtime (main yield)
 void runtime_yield();
 
-// takes the loch_tcb to get the value
-// returns the value
-// if TCB is not ready, we block (reschedule)
-uint64_t loch_get(uint64_t loch_tcb);
 
 // the infinite loop of checking for work ()
 void check_for_work();
