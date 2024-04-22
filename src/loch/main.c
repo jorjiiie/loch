@@ -16,7 +16,7 @@
 #include <unistd.h>
 
 // number of threads to execute snake code with
-#define NUM_THREADS 8
+#define NUM_THREADS 1
 
 typedef uint64_t SNAKEVAL;
 
@@ -104,6 +104,8 @@ pthread_t threads[NUM_THREADS + 1];
 SNAKEVAL set_stack_bottom(uint64_t *stack_bottom) {
   return 0;
 }
+void naive_print_heap(uint64_t *heap, uint64_t *heap_end);
+
 uint64_t *reserve(uint64_t wanted, uint64_t *rbp, uint64_t *rsp) {
 
   state.current_context->frame_top = rsp;
@@ -160,6 +162,9 @@ uint64_t *reserve(uint64_t wanted, uint64_t *rbp, uint64_t *rsp) {
   gc_state->heap_ptr += wanted;
 
   atomic_fetch_sub(&gc_state->gc_ack, 1);
+  printlog("returning %p", ret);
+  naive_print_heap(gc_state->heap_start, gc_state->heap_end);
+
   if (pthread_mutex_unlock(&gc_state->lock)) {
     perror("pthread_mutex_unlock");
     exit(1);
@@ -375,6 +380,10 @@ void error(uint64_t code, SNAKEVAL val) {
                                         // setters for lock reasons
   fflush(stdout);
 skip_print:
+printlog("gc pointers are %p %p", gc_state->heap_start, gc_state->heap_end);
+
+naive_print_heap(gc_state->heap_start, gc_state->heap_end);
+
   free(gc_state->heap_start);
   exit(code);
 }
@@ -419,6 +428,12 @@ void loch_teardown() {
     pthread_join(threads[i], NULL);
   }
 }
+
+_Atomic uint64_t global_ans = 0;
+void main_runner(void) {
+    global_ans = our_code_starts_here();
+    setcontext(&state.wait_ctx);
+}
 int main(int argc, char **argv) {
   uint64_t HEAP_SIZE = 100000;
   HEAP_SIZE = 100000;
@@ -432,36 +447,31 @@ int main(int argc, char **argv) {
 
   uint64_t *aligned = (uint64_t *)(((uint64_t)gc_state->heap_ptr + 15) & ~0xF);
   gc_state->heap_end = aligned + HEAP_SIZE;
+  gc_state->heap_ptr = aligned;
+
+  printlog("gc pointers are %p %p", gc_state->heap_start, gc_state->heap_end);
+
 
   loch_setup();
 
-  for (int i = 0; i < NUM_TASK; i++) {
-    tcb_t *tcb = tcb_create(i);
-    sched_enqueue(scheduler, tcb);
-    printlog("enqueue!");
-    // usleep(30000);
-  }
-  SNAKEVAL result;
-  // slight problem of what the main thread does - probably just fake a
-  // context too? (or just chill here and we throw out_code_starts_here as a
-  // context?)
+  tcb_t *main_tcb = tcb_create(0);
+  makecontext(&main_tcb->ctx, main_runner,0);
+  sched_enqueue(scheduler, main_tcb);
 
-  printlog("%lu %llu", sched_size(scheduler),
-           atomic_load(&gc_state->active_threads));
-  // SNAKEVAL result = our_code_starts_here();
+
+
 
   while (sched_size(scheduler) || atomic_load(&gc_state->active_threads) != 0) {
     usleep(1000);
   }
   loch_teardown();
-  printlog("okay %llu", atomic_load(&gg));
-  for (int i = 0; i < NUM_TASK; i++) {
-    if (cnt[i] != 2) {
-      printlog("ERROR %d %d", i, cnt[i]);
-    }
-  }
 
+  uint64_t result = global_ans;
+  printlog("gc pointers are %p %p", gc_state->heap_start, gc_state->heap_end);
+
+  naive_print_heap(gc_state->heap_start, gc_state->heap_end);
   print(result);
+
 
   free(gc_state->heap_start);
   return 0;

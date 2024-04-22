@@ -71,8 +71,8 @@ let err_CALL_NOT_CLOSURE = 16L
 let err_CALL_ARITY_ERR = 17L
 let first_six_args_registers = [ RDI; RSI; RDX; RCX; R8; R9 ]
 let heap_reg = R15
-let scratch_reg = R11
-let scratch_reg2 = R12
+let scratch_reg = R12 (* callee saved! *)
+let scratch_reg2 = R13
 let glob_name = "global"
 
 (* You may find some of these helpers useful *)
@@ -1060,12 +1060,12 @@ and compile_clambda (e : tag cexpr) (envs : arg envt envt) (ftag : string)
                      Reg scratch_reg2 );
                ])
              fv)
-      @ (if allocd then
-           [
-             IInstrComment
-               (IMov (Reg RAX, Reg scratch_reg), "Moving prealloc'd pointer");
-           ]
-         else [ ILineComment "Reserving!" ] @ reserve (word_size * lambda_sz))
+      (*@ (if allocd then
+          [
+            IInstrComment
+              (IMov (Reg RAX, Reg scratch_reg), "Moving prealloc'd pointer");
+          ]
+        else [ ILineComment "Reserving!" ] @ reserve (word_size * lambda_sz))*)
       @ [ IAdd (Reg RAX, Const closure_tag) ]
   | _ -> raise (InternalCompilerError "compile_clambda: expected CLambda")
 
