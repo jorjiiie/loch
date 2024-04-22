@@ -60,3 +60,11 @@ dkms.conf
 *.cma
 src/_build/*
 src/_build
+src/output
+test/
+
+*.DS_Store
+
+src/test
+src/main
+src/out

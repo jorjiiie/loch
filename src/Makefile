@@ -1,5 +1,7 @@
 SNAKE_EXT= loch
 UNAME := $(shell uname)
+SOURCES = gc.c loch.c main.c map.c sched.c set.c tcb.c
+SOURCE_FILES = $(addprefix loch/, $(SOURCES))
 ifeq ($(UNAME), Linux)
   NASM_FORMAT=elf64
   CLANG_FLAGS=-mstackrealign -m64 -g -fstack-protector-all -Wstack-protector -fno-omit-frame-pointer
@@ -21,8 +23,8 @@ test: *.ml parser.mly lexer.mll main
 	$(BUILD) -package $(PKGS) test.native
 	mv test.native test
 
-output/%.run: output/%.o main.c gc.c
-	clang $(CLANG_FLAGS) -o $@ gc.c main.c $<
+output/%.run: output/%.o $(SOURCE_FILES)
+	clang $(CLANG_FLAGS) -o $@ $(SOURCE_FILES) $<
 
 output/%.o: output/%.s
 	nasm -f $(NASM_FORMAT) -o $@ $<
@@ -31,8 +33,8 @@ output/%.o: output/%.s
 output/%.s: input/%.$(SNAKE_EXT) main
 	./main $< > $@
 
-output/do_pass/%.run: output/do_pass/%.o main.c gc.c
-	clang $(CLANG_FLAGS) -o $@ gc.c main.c $<
+output/do_pass/%.run: output/do_pass/%.o $(SOURCE_FILES)
+	clang $(CLANG_FLAGS) -o $@ $(SOURCE_FILES) $<
 
 output/do_pass/%.o: output/do_pass/%.s
 	nasm -f $(NASM_FORMAT) -o $@ $<
@@ -42,8 +44,8 @@ output/do_pass/%.s: input/do_pass/%.$(SNAKE_EXT) main
 	./main $< > $@
 
 
-output/dont_pass/%.run: output/dont_pass/%.o main.c gc.c
-	clang -g $(CLANG_FLAGS) -o $@ gc.c main.c $<
+output/dont_pass/%.run: output/dont_pass/%.o $(SOURCE_FILES)
+	clang -g $(CLANG_FLAGS) -o $@ $(SOURCE_FILES) $<
 
 output/dont_pass/%.o: output/dont_pass/%.s
 	nasm -f $(NASM_FORMAT) -o $@ $<
@@ -53,8 +55,8 @@ output/dont_pass/%.s: input/dont_pass/%.$(SNAKE_EXT) main
 	./main $< > $@
 
 
-output/do_err/%.run: output/do_err/%.o main.c gc.c
-	clang $(CLANG_FLAGS) -o $@ gc.c main.c $<
+output/do_err/%.run: output/do_err/%.o $(SOURCE_FILES)
+	clang $(CLANG_FLAGS) -o $@ $(SOURCE_FILES) $<
 
 output/do_err/%.o: output/do_err/%.s
 	nasm -f $(NASM_FORMAT) -o $@ $<
@@ -64,8 +66,8 @@ output/do_err/%.s: input/do_err/%.$(SNAKE_EXT) main
 	./main $< > $@
 
 
-output/dont_err/%.run: output/dont_err/%.o main.c gc.c
-	clang -g $(CLANG_FLAGS) -o $@ gc.c main.c $<
+output/dont_err/%.run: output/dont_err/%.o $(SOURCE_FILES)
+	clang -g $(CLANG_FLAGS) -o $@ $(SOURCE_FILES) $<
 
 output/dont_err/%.o: output/dont_err/%.s
 	nasm -f $(NASM_FORMAT) -o $@ $<

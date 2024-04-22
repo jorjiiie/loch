@@ -111,6 +111,7 @@ let rec i_to_asm (i : instruction) : string =
   match i with
   | IMov (dest, value) ->
       sprintf "  mov %s, %s" (arg_to_asm dest) (arg_to_asm value)
+  | IXchg (m1, m2) -> sprintf "  xchg %s, %s" (arg_to_asm m1) (arg_to_asm m2)
   | ILea (dest, value) ->
       sprintf "  lea %s, [rel %s]" (arg_to_asm dest) (arg_to_asm value)
   | IAdd (dest, to_add) ->

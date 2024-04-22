@@ -6,6 +6,7 @@
 #include "loch.h"
 #include "sched.h"
 #include "tcb.h"
+#include "set.h"
 
 #include "debug.h"
 
@@ -33,6 +34,7 @@ extern SNAKEVAL equal(SNAKEVAL val1, SNAKEVAL val2) asm("equal");
 extern uint64_t *try_gc(uint64_t *alloc_ptr, uint64_t amount_needed,
                         uint64_t *first_frame,
                         uint64_t *stack_top) asm("try_gc");
+extern uint64_t *reserve(uint64_t size, uint64_t *rbp, uint64_t *rsp) asm("reserve");
 
 extern uint64_t _loch_yield(uint64_t *rbp, uint64_t *rsp) asm("_loch_yield");
 
@@ -98,6 +100,74 @@ sched_t *scheduler;
 
 // threads
 pthread_t threads[NUM_THREADS + 1];
+
+SNAKEVAL set_stack_bottom(uint64_t *stack_bottom) {
+  return 0;
+}
+uint64_t *reserve(uint64_t wanted, uint64_t *rbp, uint64_t *rsp) {
+
+  state.current_context->frame_top = rsp;
+  state.current_context->frame_bottom = rbp;
+
+  gc_state->gc_ack++;
+  if (pthread_mutex_lock(&gc_state->lock)) {
+    perror("pthread_mutex_lock");
+    exit(1);
+  }
+  // alloc [heap_ptr, heap_ptr + wanted)
+  if (gc_state->heap_ptr + wanted > gc_state->heap_end) {
+    // gc
+    atomic_store(&gc_state->gc_flag, 1);
+
+    // wait until all threads are in a safe state
+    while (atomic_load(&gc_state->gc_ack) !=
+           atomic_load(&gc_state->active_threads)) {
+      usleep(10);
+    }
+    // all threads are waiting, go GC
+
+    set_clear(gc_state->seen_threads);
+    uint64_t *new_heap = calloc(gc_state->HEAP_SIZE, 1);
+    uint64_t *new_ptr =
+        gc(gc_state->heap_start, new_heap, new_heap + gc_state->HEAP_SIZE);
+
+    free(gc_state->heap_start);
+
+    // i am not going to both clearing everyone out
+    if (new_ptr + wanted > (new_heap + gc_state->HEAP_SIZE)) {
+      fprintf(stderr, "gc failed to allocate enough memory\n");
+      exit(1);
+    }
+    // thread cleanup
+
+    gc_state->heap_start = new_heap;
+    gc_state->heap_ptr = new_ptr;
+    gc_state->heap_end = new_heap + gc_state->HEAP_SIZE;
+
+    gc_state->heap_ptr += wanted;
+
+    atomic_store(&gc_state->gc_flag, 0);
+
+    atomic_fetch_sub(&gc_state->gc_ack, 1);
+    if (pthread_mutex_unlock(&gc_state->lock)) {
+      perror("pthread_mutex_unlock");
+      exit(1);
+    }
+
+    return new_ptr;
+  }
+  uint64_t *ret = gc_state->heap_ptr;
+  gc_state->heap_ptr += wanted;
+
+  atomic_fetch_sub(&gc_state->gc_ack, 1);
+  if (pthread_mutex_unlock(&gc_state->lock)) {
+    perror("pthread_mutex_unlock");
+    exit(1);
+  }
+  return ret;
+}
+
+
 
 SNAKEVAL equal(SNAKEVAL val1, SNAKEVAL val2) {
   if (val1 == val2) {

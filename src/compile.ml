@@ -952,10 +952,8 @@ and compile_aexpr (e : tag aexpr) (env : arg envt envt) (ftag : string)
               ILineComment
                 (sprintf "Allocating %s, fill in with zeros if you want" name);
             ]
-            @ reserve (word_size * lambda_sz) name
+            @ reserve (word_size * lambda_sz)
             @ [
-                IMov (Reg RAX, Reg heap_reg);
-                IAdd (Reg heap_reg, Const (Int64.of_int (word_size * lambda_sz)));
                 IAdd (Reg RAX, Const closure_tag);
                 IMov (find current_env name, Reg RAX);
               ])
@@ -1032,8 +1030,7 @@ and compile_clambda (e : tag cexpr) (envs : arg envt envt) (ftag : string)
       @ [ ILabel end_label ]
       @ (if allocd then [ ILineComment "Already Allocated" ]
          else
-           reserve (word_size * lambda_sz) (sprintf "closure_reserve_%d" tag)
-           @ [ IMov (Reg scratch_reg, Reg heap_reg) ])
+           reserve (word_size * lambda_sz) @ [ IMov (Reg scratch_reg, Reg RAX) ])
       @ [
           IInstrComment
             ( IMov
@@ -1068,11 +1065,7 @@ and compile_clambda (e : tag cexpr) (envs : arg envt envt) (ftag : string)
              IInstrComment
                (IMov (Reg RAX, Reg scratch_reg), "Moving prealloc'd pointer");
            ]
-         else
-           [
-             IInstrComment (IMov (Reg RAX, Reg heap_reg), "Closure pointer");
-             IAdd (Reg heap_reg, Const (Int64.of_int (word_size * lambda_sz)));
-           ])
+         else [ ILineComment "Reserving!" ] @ reserve (word_size * lambda_sz))
       @ [ IAdd (Reg RAX, Const closure_tag) ]
   | _ -> raise (InternalCompilerError "compile_clambda: expected CLambda")
 
@@ -1436,18 +1429,14 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
   | CImmExpr imm_e -> [ IMov (Reg RAX, compile_imm imm_e env) ]
   | CTuple (exprs, t) ->
       (* allocate the memory and then return the pointer *)
-      let name = sprintf "reserve_tuple_%d" t in
       let size = List.length exprs in
       (* heap_reg is the heap *)
       let alloc_size = size + 1 + ((size + 1) mod 2) in
 
       (* pad to the right word size*)
-      reserve (alloc_size * word_size) name
+      reserve (alloc_size * word_size)
       @ [
-          IMov (Reg scratch_reg, Reg heap_reg);
-          IInstrComment
-            ( IAdd (Reg heap_reg, Const (Int64.of_int (alloc_size * word_size))),
-              "Allocating space for tuple" );
+          IMov (Reg scratch_reg, Reg RAX);
           IMov
             ( Sized (QWORD_PTR, RegOffset (0, scratch_reg)),
               Const (Int64.of_int (2 * size)) );
@@ -1591,37 +1580,16 @@ and native_call label args =
   @ List.map (fun x -> IPop x) offset
   @ [ ILineComment "End of native call" ]
 
-and reserve size name =
-  let ok = sprintf "$memcheck_%s" name in
+(* reserves AND puts it into heap register. no need to increment though!*)
+and reserve size =
   [
-    IInstrComment
-      ( ILea (Reg RAX, Label "HEAP_END"),
-        sprintf "Reserving %d words" (size / word_size) );
-    IMov (Reg RAX, RegOffset (0, RAX));
-    ISub (Reg RAX, Const (Int64.of_int size));
-    ICmp (Reg RAX, Reg heap_reg);
-    IJge (Label ok);
+    ILineComment (sprintf "Reserving %d words" (size / word_size));
+    IMov (Reg RDI, Const (Int64.of_int (size / word_size)));
+    IMov (Reg RSI, Reg RBP);
+    IMov (Reg RDX, Reg RSP);
+    ICall (Label "reserve");
+    IMov (Reg heap_reg, Reg RAX);
   ]
-  @ native_call (Label "try_gc")
-      [
-        Sized (QWORD_PTR, Reg heap_reg);
-        (* alloc_ptr in C *)
-        Sized (QWORD_PTR, Const (Int64.of_int size));
-        (* bytes_needed in C *)
-        Sized (QWORD_PTR, Reg RBP);
-        (* first_frame in C *)
-        Sized (QWORD_PTR, Reg RSP);
-        (* stack_top in C *)
-
-        (* TODO: how do we get rbp for ourcodestarts here :O *)
-      ]
-  @ [
-      IInstrComment
-        ( IMov (Reg heap_reg, Reg RAX),
-          "assume gc success if returning here, so RAX holds the new heap_reg \
-           value" );
-      ILabel ok;
-    ]
 
 let compile_prog ((anfed : tag aprogram), (env : arg envt envt)) : string =
   match anfed with
@@ -1632,7 +1600,7 @@ let compile_prog ((anfed : tag aprogram), (env : arg envt envt)) : string =
          extern error\n\
          extern print\n\
          extern input\n\
-         extern try_gc\n\
+         extern reserve\n\
          extern naive_print_heap\n\
          extern _loch_thread_create\n\
          extern _loch_thread_get\n\
@@ -1666,21 +1634,6 @@ let compile_prog ((anfed : tag aprogram), (env : arg envt envt)) : string =
       let comp_body =
         [ ILineComment "Body start!**" ]
         @ compile_aexpr body env glob_name 0 false
-      in
-      let heap_start =
-        [
-          ILineComment "heap start";
-          IInstrComment
-            ( IMov (Reg heap_reg, Reg (List.nth first_six_args_registers 0)),
-              "Load heap_reg with our argument, the heap pointer" );
-          IInstrComment
-            ( IAdd (Reg heap_reg, Const 15L),
-              "Align it to the nearest multiple of 16" );
-          IMov (Reg scratch_reg, HexConst 0xFFFFFFFFFFFFFFF0L);
-          IInstrComment
-            ( IAnd (Reg heap_reg, Reg scratch_reg),
-              "by adding no more than 15 to it" );
-        ]
       in
       let error_handle =
         to_asm
@@ -1748,8 +1701,7 @@ let compile_prog ((anfed : tag aprogram), (env : arg envt envt)) : string =
           ]
       in
       let main =
-        to_asm
-          (body_prologue @ stack_setup @ heap_start @ comp_body @ body_epilogue)
+        to_asm (body_prologue @ stack_setup @ comp_body @ body_epilogue)
       in
       prologue ^ "\nour_code_starts_here:" ^ main ^ error_handle
 

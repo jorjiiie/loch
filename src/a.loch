@@ -1,0 +1,5 @@
+def fib(n):
+    if n < 2: n else: fib(n - 1) + fib(n - 2)
+
+let a = thread((lambda : fib(10))) in
+ start(a); fib(11)+ get(a)

@@ -50,6 +50,6 @@ uint64_t *gc(uint64_t *from_start, uint64_t *to_start, uint64_t *to_end);
 
 // basically just malloc
 // actually reserves memory, unlike in the assignments
-uint64_t *reserve(uint64_t wanted, uint64_t *rsp, uint64_t *rbp);
+//uint64_t *reserve(uint64_t wanted, uint64_t *rbp, uint64_t *rsp);
 
 #endif
