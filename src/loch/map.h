@@ -24,7 +24,7 @@ typedef struct kv {
 } kv_t;
 
 #define MAP_SIZE 1024
-#define NUM_LOCKS 2
+#define NUM_LOCKS 10
 
 // hash function is the brilliant identity
 typedef struct map {

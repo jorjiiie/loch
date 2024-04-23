@@ -16,12 +16,17 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 map_t *map_create() {
   map_t *mp = (map_t *)malloc(sizeof(map_t));
   mp->size = 0;
   for (int i = 0; i < NUM_LOCKS; i++) {
-    pthread_rwlock_init(&mp->locks[i], NULL);
+    if (pthread_rwlock_init(&mp->locks[i], NULL)) {
+      printlog("no bueno init lock!");
+      exit(1);
+    }
+
   }
   for (int i = 0; i < MAP_SIZE; i++) {
     mp->table[i] = NULL;
@@ -62,7 +67,10 @@ void map_put(map_t *map, uint64_t key, tcb_t *value) {
   uint64_t bucket = key & (MAP_SIZE - 1);
   uint64_t lock = key & (NUM_LOCKS - 1);
 
-  if (pthread_rwlock_wrlock(&map->locks[lock])) {
+  printlog("what is going on %llu %llu %p", bucket, lock, &map->locks[lock]);
+  int err = pthread_rwlock_wrlock(&map->locks[lock]);
+  if (err) {
+    printlog("HUH???? %d %d %d %d",err, EBUSY, EINVAL, EDEADLK);
     perror("pthread_rwlock_wrlock");
     exit(1);
   }
@@ -72,6 +80,7 @@ void map_put(map_t *map, uint64_t key, tcb_t *value) {
   // remember! NO collisions or we will be VERY sad
   kv_t *n = (kv_t *)malloc(sizeof(kv_t));
 
+  printlog("putting %llu %p", key, value);
   n->key = key;
   n->value = value;
   n->next = map->table[bucket];

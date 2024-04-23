@@ -7,6 +7,7 @@
 #include "sched.h"
 #include "tcb.h"
 #include "set.h"
+#include "map.h"
 
 #include "debug.h"
 
@@ -456,6 +457,7 @@ int main(int argc, char **argv) {
 
   tcb_t *main_tcb = tcb_create(0);
   makecontext(&main_tcb->ctx, main_runner,0);
+  map_put(gc_state->map, 0, main_tcb);
   sched_enqueue(scheduler, main_tcb);
 
 

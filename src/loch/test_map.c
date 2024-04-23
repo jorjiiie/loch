@@ -12,6 +12,11 @@
 
 #define NUM_THREAD 8
 
+tcb_t *tcb_create(uint64_t i) {
+  tcb_t *tcb = (tcb_t *)malloc(sizeof(tcb_t));
+  tcb->closure_ptr = i;
+  return tcb;
+}
 map_t *m;
 void *pthread_job(void *arg) {
   int id = (int)(intptr_t)arg;
