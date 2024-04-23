@@ -40,7 +40,7 @@ extern _Thread_local thread_state_t state;
 gc_t *gc_init(uint64_t heap_size) {
   gc_t *gc = malloc(sizeof(gc_t));
   gc->HEAP_SIZE = heap_size;
-  gc->heap_start = calloc(heap_size, 1);
+  gc->heap_start = calloc(heap_size, 8);
   if (gc->heap_start == NULL) {
     perror("calloc");
     exit(1);
@@ -134,7 +134,7 @@ uint64_t *copy_if_needed(uint64_t *addr, uint64_t *heap) {
 uint64_t *gc_tcb(tcb_t *tcb, uint64_t *from_start, uint64_t *to_start,
                  uint64_t *to_end) {
 
-  uint64_t *old_rsp = tcb->frame_top;
+  uint64_t *old_rbp = tcb->frame_top;
   uint64_t *top_rsp = tcb->frame_top;
   uint64_t *top_rbp = tcb->frame_bottom;
   do {
@@ -142,9 +142,9 @@ uint64_t *gc_tcb(tcb_t *tcb, uint64_t *from_start, uint64_t *to_start,
       to_start = copy_if_needed(cur_word, to_start);
     }
     top_rsp = top_rbp + 2;
-    old_rsp = top_rbp;
+    old_rbp = top_rbp;
     top_rbp = (uint64_t *)*top_rbp;
-  } while (old_rsp < tcb->stack_bottom);
+  } while (old_rbp < tcb->stack_bottom);
 
   return to_start;
 }

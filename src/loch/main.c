@@ -103,6 +103,7 @@ sched_t *scheduler;
 pthread_t threads[NUM_THREADS + 1];
 
 SNAKEVAL set_stack_bottom(uint64_t *stack_bottom) {
+  state.current_context->stack_bottom = stack_bottom;
   return 0;
 }
 void naive_print_heap(uint64_t *heap, uint64_t *heap_end);
@@ -130,7 +131,7 @@ uint64_t *reserve(uint64_t wanted, uint64_t *rbp, uint64_t *rsp) {
     // all threads are waiting, go GC
 
     set_clear(gc_state->seen_threads);
-    uint64_t *new_heap = calloc(gc_state->HEAP_SIZE, 1);
+    uint64_t *new_heap = calloc(gc_state->HEAP_SIZE, 8); // number of words
     uint64_t *new_ptr =
         gc(gc_state->heap_start, new_heap, new_heap + gc_state->HEAP_SIZE);
 

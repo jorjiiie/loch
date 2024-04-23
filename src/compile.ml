@@ -75,7 +75,6 @@ let err_EXPECTED_LAMBDA_THREAD = 20
 let err_EXPECTED_THREAD_START = 21
 let err_EXPECTED_THREAD_GET = 22
 let first_six_args_registers = [ RDI; RSI; RDX; RCX; R8; R9 ]
-let heap_reg = R15
 let scratch_reg = R12 (* callee saved! *)
 let scratch_reg2 = R13
 let glob_name = "global"
@@ -957,7 +956,7 @@ and compile_aexpr (e : tag aexpr) (env : arg envt envt) (ftag : string)
               ILineComment
                 (sprintf "Allocating %s, fill in with zeros if you want" name);
             ]
-            @ reserve (word_size * lambda_sz)
+            @ reserve lambda_sz
             @ [
                 IAdd (Reg RAX, Const closure_tag);
                 IMov (find current_env name, Reg RAX);
@@ -997,6 +996,7 @@ and compile_clambda (e : tag cexpr) (envs : arg envt envt) (ftag : string)
       let aligned_sz = tmp_sz + (tmp_sz mod 16) in
       [ IJmp (Label end_label) ]
       @ [ IInstrComment (ILabel start_label, "Lambda Body") ]
+        (* put the yield call here! *)
       @ [
           ILineComment "Adjust stack pointer";
           IPush (Reg RBP);
@@ -1034,8 +1034,7 @@ and compile_clambda (e : tag cexpr) (envs : arg envt envt) (ftag : string)
         ]
       @ [ ILabel end_label ]
       @ (if allocd then [ ILineComment "Already Allocated" ]
-         else
-           reserve (word_size * lambda_sz) @ [ IMov (Reg scratch_reg, Reg RAX) ])
+         else reserve lambda_sz @ [ IMov (Reg scratch_reg, Reg RAX) ])
       @ [
           IInstrComment
             ( IMov
@@ -1065,12 +1064,6 @@ and compile_clambda (e : tag cexpr) (envs : arg envt envt) (ftag : string)
                      Reg scratch_reg2 );
                ])
              fv)
-      (*@ (if allocd then
-          [
-            IInstrComment
-              (IMov (Reg RAX, Reg scratch_reg), "Moving prealloc'd pointer");
-          ]
-        else [ ILineComment "Reserving!" ] @ reserve (word_size * lambda_sz))*)
       @ [ IAdd (Reg RAX, Const closure_tag) ]
   | _ -> raise (InternalCompilerError "compile_clambda: expected CLambda")
 
@@ -1435,11 +1428,9 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
   | CTuple (exprs, t) ->
       (* allocate the memory and then return the pointer *)
       let size = List.length exprs in
-      (* heap_reg is the heap *)
       let alloc_size = size + 1 + ((size + 1) mod 2) in
-
       (* pad to the right word size*)
-      reserve (alloc_size * word_size)
+      reserve alloc_size
       @ [
           IMov (Reg scratch_reg, Reg RAX);
           IMov
@@ -1588,12 +1579,11 @@ and native_call label args =
 (* reserves AND puts it into heap register. no need to increment though!*)
 and reserve size =
   [
-    ILineComment (sprintf "Reserving %d words" (size / word_size));
-    IMov (Reg RDI, Const (Int64.of_int (size / word_size)));
+    ILineComment (sprintf "Reserving %d words" size);
+    IMov (Reg RDI, Const (Int64.of_int size));
     IMov (Reg RSI, Reg RBP);
     IMov (Reg RDX, Reg RSP);
     ICall (Label "reserve");
-    IMov (Reg heap_reg, Reg RAX);
   ]
 
 let compile_prog ((anfed : tag aprogram), (env : arg envt envt)) : string =
@@ -1731,8 +1721,6 @@ let compile_prog ((anfed : tag aprogram), (env : arg envt envt)) : string =
             IMov (Reg RDI, Const 22L);
             IMov (Reg RSI, Reg RAX);
             ICall (Label "error");
-
-
           ]
       in
       let main =
