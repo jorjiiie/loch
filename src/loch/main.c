@@ -4,10 +4,10 @@
 
 #include "gc.h"
 #include "loch.h"
-#include "sched.h"
-#include "tcb.h"
-#include "set.h"
 #include "map.h"
+#include "sched.h"
+#include "set.h"
+#include "tcb.h"
 
 #include "debug.h"
 
@@ -35,7 +35,8 @@ extern SNAKEVAL equal(SNAKEVAL val1, SNAKEVAL val2) asm("equal");
 extern uint64_t *try_gc(uint64_t *alloc_ptr, uint64_t amount_needed,
                         uint64_t *first_frame,
                         uint64_t *stack_top) asm("try_gc");
-extern uint64_t *reserve(uint64_t size, uint64_t *rbp, uint64_t *rsp) asm("reserve");
+extern uint64_t *reserve(uint64_t size, uint64_t *rbp,
+                         uint64_t *rsp) asm("reserve");
 
 extern uint64_t _loch_yield(uint64_t *rbp, uint64_t *rsp) asm("_loch_yield");
 
@@ -118,6 +119,14 @@ uint64_t *reserve(uint64_t wanted, uint64_t *rbp, uint64_t *rsp) {
     perror("pthread_mutex_lock");
     exit(1);
   }
+
+  if (wanted > gc_state->HEAP_SIZE) {
+    fprintf(
+        stderr,
+        "Allocation error: needed %ld words, but the heap is only %ld words\n",
+        wanted, gc_state->HEAP_SIZE);
+  }
+
   // alloc [heap_ptr, heap_ptr + wanted)
   if (gc_state->heap_ptr + wanted > gc_state->heap_end) {
     // gc
@@ -139,7 +148,11 @@ uint64_t *reserve(uint64_t wanted, uint64_t *rbp, uint64_t *rsp) {
 
     // i am not going to both clearing everyone out
     if (new_ptr + wanted > (new_heap + gc_state->HEAP_SIZE)) {
-      fprintf(stderr, "gc failed to allocate enough memory\n");
+          fprintf(stderr,
+            "Allocation Error: Out of memory: needed %ld words, but only %ld "
+            "remain after collection\n",
+            wanted, gc_state->HEAP_SIZE);
+
       exit(1);
     }
     // thread cleanup
@@ -173,8 +186,6 @@ uint64_t *reserve(uint64_t wanted, uint64_t *rbp, uint64_t *rsp) {
   }
   return ret;
 }
-
-
 
 SNAKEVAL equal(SNAKEVAL val1, SNAKEVAL val2) {
   if (val1 == val2) {
@@ -379,12 +390,12 @@ void error(uint64_t code, SNAKEVAL val) {
   fflush(stderr);
   // naive_print_heap(gc_state->heap_ptr,
   //                  gc_state->heap_end); // you really want to do getters and
-                                        // setters for lock reasons
+  // setters for lock reasons
   fflush(stdout);
 skip_print:
-printlog("gc pointers are %p %p", gc_state->heap_start, gc_state->heap_end);
+  printlog("gc pointers are %p %p", gc_state->heap_start, gc_state->heap_end);
 
-// naive_print_heap(gc_state->heap_start, gc_state->heap_end);
+  // naive_print_heap(gc_state->heap_start, gc_state->heap_end);
 
   free(gc_state->heap_start);
   exit(code);
@@ -433,8 +444,8 @@ void loch_teardown() {
 
 _Atomic uint64_t global_ans = 0;
 void main_runner(void) {
-    global_ans = our_code_starts_here();
-    setcontext(&state.wait_ctx);
+  global_ans = our_code_starts_here();
+  setcontext(&state.wait_ctx);
 }
 int main(int argc, char **argv) {
   uint64_t HEAP_SIZE = 100000;
@@ -453,16 +464,12 @@ int main(int argc, char **argv) {
 
   printlog("gc pointers are %p %p", gc_state->heap_start, gc_state->heap_end);
 
-
   loch_setup();
 
   tcb_t *main_tcb = tcb_create(0);
-  makecontext(&main_tcb->ctx, main_runner,0);
+  makecontext(&main_tcb->ctx, main_runner, 0);
   map_put(gc_state->map, 0, main_tcb);
   sched_enqueue(scheduler, main_tcb);
-
-
-
 
   while (sched_size(scheduler) || atomic_load(&gc_state->active_threads) != 0) {
     usleep(1000);
@@ -474,7 +481,6 @@ int main(int argc, char **argv) {
 
   // naive_print_heap(gc_state->heap_start, gc_state->heap_end);
   print(result);
-
 
   free(gc_state->heap_start);
   return 0;
