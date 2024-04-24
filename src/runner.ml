@@ -233,7 +233,7 @@ let parse_args (argsfile : string) (opts : compile_opts) : string list =
   else
     match opts.heap_size with Some size -> [ string_of_int size ] | None -> []
 
-let test_run ?(no_builtins = true) ?(args = []) ?(std_input = "") program_str
+let test_run ?(no_builtins = false) ?(args = []) ?(std_input = "") program_str
     outfile expected ?(cmp = ( = )) test_ctxt =
   let full_outfile = "output/" ^ outfile in
   let result =

@@ -1,1 +1,1 @@
-thread((lambda(): 1))
+thread((lambda : 1))

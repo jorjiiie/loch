@@ -30,11 +30,11 @@ typedef struct thread_state {
 // calls into threads_start_here function with the heap pointer,
 // and this as args
 void tcb_runner(uint32_t tcb_high, uint32_t tcb_low, uint32_t closure_high,
-                uint32_t closure_low);
+                uint32_t closure_low) asm("tcb_runner");
 
 // sets the stack bottom of the tcb
 // first thing called by thread_code_starts_here
-uint64_t tcb_set_stack_bottom(uint64_t *stack_bottom);
+// uint64_t tcb_set_stack_bottom(uint64_t *stack_bottom) asm("tcb_set_stack_bottom");
 
 // yield from inside the runtime (main yield)
 void runtime_yield();
@@ -45,19 +45,19 @@ void check_for_work();
 
 // make sure you're being consistent here
 // basically every time we can switch contexts, we must be ready to gc
-uint64_t _loch_yield(uint64_t *rbp, uint64_t *rsp);
+uint64_t _loch_yield(uint64_t *rbp, uint64_t *rsp) asm("_loch_yield");
 
 // creates a new thread that will call closure
-uint64_t _loch_thread_create(uint64_t closure);
+uint64_t _loch_thread_create(uint64_t closure) asm("_loch_thread_create");
 
 // takes in a untagged threadid. returns the value of the completed computation.
 // we provide rbp and rsp as this blocks
-uint64_t _loch_thread_get(uint64_t thread, uint64_t *rbp, uint64_t *rsp);
+uint64_t _loch_thread_get(uint64_t thread, uint64_t *rbp, uint64_t *rsp) asm("_loch_thread_get");
 
 // starts a thread, although it may not start immediately
-uint64_t _loch_thread_start(uint64_t thread);
+uint64_t _loch_thread_start(uint64_t thread) asm("_loch_thread_start");
 
 // obvious
-uint64_t _lock_set_stack(uint64_t *bottom);
+uint64_t _loch_set_stack(uint64_t *bottom) asm("_loch_set_stack");
 
 #endif

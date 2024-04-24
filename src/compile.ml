@@ -1006,6 +1006,12 @@ and compile_clambda (e : tag cexpr) (envs : arg envt envt) (ftag : string)
       @ List.map
           (fun _ -> IPush (Const 0L))
           (List.init (aligned_sz / 8) (fun _ -> 0))
+      (* @ [
+           ILineComment "Yield";
+           IMov (Reg RDI, Reg RBP);
+           IMov (Reg RSI, Reg RSP);
+           ICall (Label "_loch_yield");
+         ] *)
       @ [
           IInstrComment
             ( IMov (Reg scratch_reg, RegOffset (16, RBP)),
@@ -1209,7 +1215,7 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
             IAnd (Reg RAX, Reg R11);
             ICmp (Reg RAX, Const closure_tag);
             IJne (Label "want_closure_thread");
-            IMov (Reg RDI, Reg RAX);
+            IMov (Reg RDI, lam);
             ICall (Label "_loch_thread_create");
             IAdd (Reg RAX, Const thread_tag);
           ]
@@ -1605,7 +1611,35 @@ let compile_prog ((anfed : tag aprogram), (env : arg envt envt)) : string =
          extern HEAP\n\
          extern HEAP_END\n\
          extern set_stack_bottom\n\
-         global our_code_starts_here\n"
+         global our_code_starts_here\n\
+         global thread_code_starts_here\n"
+      in
+      let thread_code_start_here_code =
+        [
+          ILabel "thread_code_starts_here";
+          IPush (Reg RBP);
+          IPush (Reg R12);
+          IPush (Reg R13);
+          IPush (Reg R14);
+          IPush (Reg R15);
+          IPush(Const 0L);
+          IInstrComment
+            (IMov (Reg scratch_reg, Reg RDI), "Move closure to scratch_reg");
+          IMov (Reg RBP, Reg RSP);
+          IMov (Reg RDI, Reg RBP);
+          ICall (Label "_loch_set_stack");
+          ISub (Reg scratch_reg, Const closure_tag);
+          IMov (Reg RAX, RegOffset (8, scratch_reg));
+          ICall (Reg RAX);
+          IMov (Reg RSP, Reg RBP);
+          IPop (Reg R15);
+          IPop (Reg R15);
+          IPop (Reg R14);
+          IPop (Reg R13);
+          IPop (Reg R12);
+          IPop (Reg RBP);
+          IRet;
+        ]
       in
       let global_env = find env glob_name in
       let tmp_sz = deepest_stack global_env in
@@ -1727,6 +1761,7 @@ let compile_prog ((anfed : tag aprogram), (env : arg envt envt)) : string =
         to_asm (body_prologue @ stack_setup @ comp_body @ body_epilogue)
       in
       prologue ^ "\nour_code_starts_here:" ^ main ^ error_handle
+      ^ to_asm thread_code_start_here_code
 
 (* Feel free to add additional phases to your pipeline.
    The final pipeline phase needs to return a string,

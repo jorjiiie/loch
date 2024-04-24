@@ -19,10 +19,8 @@
 #include <unistd.h>
 
 extern uint64_t
-thread_code_starts_here(uint64_t *heap, uint64_t sz,
-                        uint64_t closure) asm("thread_code_starts_here");
+thread_code_starts_here(uint64_t closure) asm("thread_code_starts_here");
 
-extern uint64_t do_something(uint64_t closure);
 
 /*
  * threading stuff
@@ -30,9 +28,11 @@ extern uint64_t do_something(uint64_t closure);
 extern gc_t *gc_state;
 extern sched_t *scheduler;
 
-extern _Atomic uint64_t thread_id;
+extern _Atomic uint64_t tcb_id;
 extern _Atomic uint8_t halt_flag;
 extern _Thread_local thread_state_t state;
+
+extern uint64_t LOCK_TAG;
 // table_t
 
 void tcb_runner(uint32_t tcb_high, uint32_t tcb_low, uint32_t closure_high,
@@ -41,6 +41,7 @@ void tcb_runner(uint32_t tcb_high, uint32_t tcb_low, uint32_t closure_high,
   uint64_t arg = (uint64_t)closure_high << 32 | closure_low;
   // we have this block because when we swap to a fresh context, it won't run
   // this important code! bookkeeping 101
+  printlog("in runner");
   if (state.next_context != NULL) {
     // call from yield, must remember to reset the old stuffs
     atomic_store(&state.next_context->state, RUNNING);
@@ -51,8 +52,8 @@ void tcb_runner(uint32_t tcb_high, uint32_t tcb_low, uint32_t closure_high,
     state.current_context = state.next_context;
     state.next_context = NULL;
   }
-  // uint64_t ret = thread_code_starts_here(heap_ptr, HEAP_SIZE, arg);
-  uint64_t ret = do_something(arg);
+  uint64_t ret = thread_code_starts_here(tcb->closure_ptr);
+  // uint64_t ret = do_something(arg);
   tcb->result = ret;
   // tcb_destroy(state.current_context);
 
@@ -112,6 +113,7 @@ void runtime_yield() {
 }
 
 void check_for_work() {
+  printlog("init");
   while (1) {
     tcb_t *tcb = sched_next(scheduler);
     if (tcb == NULL) {
@@ -154,7 +156,8 @@ uint64_t _loch_yield(uint64_t *rbp, uint64_t *rsp) {
 
 uint64_t _loch_thread_create(uint64_t closure) {
   tcb_t *tcb = tcb_create(closure);
-  uint64_t t_id = atomic_fetch_add(&thread_id, 1);
+  printlog("what %llu %p %llu", closure, tcb, tcb_id);
+  uint64_t t_id = atomic_fetch_add(&tcb_id, 1);
   map_put(gc_state->map, t_id, tcb);
   return (t_id << 4);
 }
@@ -182,15 +185,17 @@ uint64_t _loch_thread_start(uint64_t thread) {
   // untag thread
   thread = (thread >> 4);
   tcb_t *tcb = map_get(gc_state->map, thread);
+  printlog("starting something! %llu %p", thread, tcb);
   if (tcb == NULL) {
     perror("invalid tcb!");
     exit(1);
   }
   sched_enqueue(scheduler, tcb);
-  return thread;
+  return (thread << 4) | LOCK_TAG;
 }
 
-uint64_t _lock_set_stack(uint64_t *bottom) {
+uint64_t _loch_set_stack(uint64_t *bottom) {
+  printlog("at bottom %p", bottom);
   tcb_t *current = state.current_context;
   current->stack_bottom = bottom;
   return 0;

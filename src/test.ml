@@ -207,7 +207,7 @@ let input = [ t "input1" "let x = input() in x + 2" "123" "125" ]
 
 let thread_tests =
   [
-    t "create_thread" "thread((lambda: 1))" "" "<thread 1>";
+    t "create_thread" "thread((lambda: 1))" "" "<thread 0>";
     t "get_simple_thread" "let t = thread((lambda : 1)) in start(t); get(t)" "" "1";
   ]
 

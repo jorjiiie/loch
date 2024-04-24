@@ -48,7 +48,7 @@ extern uint64_t _loch_thread_get(uint64_t thread, uint64_t *rbp,
 
 extern uint64_t _loch_thread_start(uint64_t thread) asm("_loch_thread_start");
 
-extern uint64_t _lock_set_stack(uint64_t *bottom) asm("_lock_set_stack");
+extern uint64_t _loch_set_stack(uint64_t *bottom) asm("_loch_set_stack");
 
 const uint64_t NUM_TAG_MASK = 0x0000000000000001;
 const uint64_t BOOL_TAG_MASK = 0x000000000000000f;
@@ -97,6 +97,7 @@ const error_code_t EXPECTED_THREAD_GET = 22;
 gc_t *gc_state;
 _Thread_local thread_state_t state;
 _Atomic uint64_t thread_id = 1;
+_Atomic uint64_t tcb_id = 0;
 _Atomic uint8_t halt_flag = 0;
 sched_t *scheduler;
 
@@ -121,10 +122,10 @@ uint64_t *reserve(uint64_t wanted, uint64_t *rbp, uint64_t *rsp) {
   }
 
   if (wanted > gc_state->HEAP_SIZE) {
-    fprintf(
-        stderr,
-        "Allocation error: needed %ld words, but the heap is only %ld words\n",
-        wanted, gc_state->HEAP_SIZE);
+    fprintf(stderr,
+            "Allocation error: needed %llu words, but the heap is only %llu "
+            "words\n",
+            wanted, gc_state->HEAP_SIZE);
   }
 
   // alloc [heap_ptr, heap_ptr + wanted)
@@ -148,10 +149,11 @@ uint64_t *reserve(uint64_t wanted, uint64_t *rbp, uint64_t *rsp) {
 
     // i am not going to both clearing everyone out
     if (new_ptr + wanted > (new_heap + gc_state->HEAP_SIZE)) {
-      fprintf(stderr,
-              "Allocation Error: Out of memory: needed %ld words, but only %ld "
-              "remain after collection\n",
-              wanted, gc_state->HEAP_SIZE);
+      fprintf(
+          stderr,
+          "Allocation Error: Out of memory: needed %llu words, but only %llu "
+          "remain after collection\n",
+          wanted, gc_state->HEAP_SIZE);
 
       exit(1);
     }
@@ -252,10 +254,10 @@ void printHelp(FILE *out, SNAKEVAL val) {
     // Unmark this tuple: restore its length
     *(addr) = len * 2; // length is encoded
   } else if ((val & THREAD_TAG_MASK) == THREAD_TAG) {
-    fprintf(out, "<thread %d>", (val >> 4));
+    fprintf(out, "<thread %llu>", (val >> 4));
     return;
   } else if ((val & LOCK_TAG_MASK) == LOCK_TAG) {
-    fprintf(out, "<lock %d>", (val >> 4));
+    fprintf(out, "<lock %llu>", (val >> 4));
     return;
   } else {
     fprintf(out, "Unknown value: %#018llx", val);
@@ -429,7 +431,7 @@ void *loch_runner(void *x) {
   // initialize thread local stuff
   state.current_context = NULL;
   state.next_context = NULL;
-  state.thread_id = atomic_load(&thread_id);
+  state.thread_id = atomic_fetch_add(&thread_id, 1);
   check_for_work();
   return NULL;
 }
