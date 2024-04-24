@@ -204,18 +204,15 @@ let gc_suite =
   ]
 
 let input = [ t "input1" "let x = input() in x + 2" "123" "125" ]
-(* let suite = "unit_tests" >::: pair_tests @ oom @ gc @ input @ gc_suite *)
-let suite = "unit_tests" >::: gc @ gc_suite
-(* let () = run_test_tt_main ("all_tests" >::: [ suite; input_file_test_suite () ]) *)
-let () = run_test_tt_main suite
-(*
-let basic_suite =
-  "gg"
-  >::: [
-         t "g1" "1" "" "1";
-         t "g2" "1 + 1" "" "2";
-         t "g3" "let x = 5 in 3 + x * 3 + 4" "" "28";
-       ]
 
-let () = run_test_tt_main ("all_tests" >::: [ basic_suite ])
-*)
+let thread_tests =
+  [
+    t "create_thread" "thread((lambda: 1))" "" "<thread 1>";
+    t "get_simple_thread" "let t = thread((lambda : 1)) in start(t); get(t)" "" "1";
+  ]
+
+let suite = "unit_tests" >::: pair_tests @ oom @ gc @ input @ gc_suite
+
+let () =
+  run_test_tt_main ("thread_tests" >::: [ "thread_suite" >::: thread_tests ])
+(* let () = run_test_tt_main ("all_tests" >::: [ suite; input_file_test_suite () ]) *)

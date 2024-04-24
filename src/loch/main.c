@@ -148,10 +148,10 @@ uint64_t *reserve(uint64_t wanted, uint64_t *rbp, uint64_t *rsp) {
 
     // i am not going to both clearing everyone out
     if (new_ptr + wanted > (new_heap + gc_state->HEAP_SIZE)) {
-          fprintf(stderr,
-            "Allocation Error: Out of memory: needed %ld words, but only %ld "
-            "remain after collection\n",
-            wanted, gc_state->HEAP_SIZE);
+      fprintf(stderr,
+              "Allocation Error: Out of memory: needed %ld words, but only %ld "
+              "remain after collection\n",
+              wanted, gc_state->HEAP_SIZE);
 
       exit(1);
     }
@@ -215,7 +215,7 @@ void printHelp(FILE *out, SNAKEVAL val) {
   if (val == NIL) {
     fprintf(out, "nil");
   } else if ((val & NUM_TAG_MASK) == NUM_TAG) {
-    fprintf(out, "%llu",
+    fprintf(out, "%lld",
             ((int64_t)val) >> 1); // deliberately int64, so that it's signed
   } else if (val == BOOL_TRUE) {
     fprintf(out, "true");
@@ -251,6 +251,12 @@ void printHelp(FILE *out, SNAKEVAL val) {
     fprintf(out, ")");
     // Unmark this tuple: restore its length
     *(addr) = len * 2; // length is encoded
+  } else if ((val & THREAD_TAG_MASK) == THREAD_TAG) {
+    fprintf(out, "<thread %d>", (val >> 4));
+    return;
+  } else if ((val & LOCK_TAG_MASK) == LOCK_TAG) {
+    fprintf(out, "<lock %d>", (val >> 4));
+    return;
   } else {
     fprintf(out, "Unknown value: %#018llx", val);
   }
@@ -381,6 +387,24 @@ void error(uint64_t code, SNAKEVAL val) {
   case ERR_CALL_ARITY_ERR:
     fprintf(stderr, "Error: arity mismatch in call\n");
     goto skip_print;
+  case EXPECTED_LOCK_LOCK:
+    fprintf(stderr, "Error: expected mutex lock, got:");
+    break;
+  case EXPECTED_LOCK_UNLOCK:
+    fprintf(stderr, "Error: expected mutex unlock, got:");
+    break;
+  case EXPECTED_LAMBDA_SCOPED:
+    fprintf(stderr, "Error: expected lambda scoped, got:");
+    break;
+  case EXPECTED_LAMBDA_THREAD:
+    fprintf(stderr, "Error: expected lambda for thread, got:");
+    break;
+  case EXPECTED_THREAD_START:
+    fprintf(stderr, "Error: expected thread for start, got:");
+    break;
+  case EXPECTED_THREAD_GET:
+    fprintf(stderr, "Error: expected threat for get, got:");
+    break;
   default:
     fprintf(stderr, "Error: Unknown error code: %llu, val: ", code);
   }
