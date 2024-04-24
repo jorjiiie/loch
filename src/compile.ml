@@ -1222,7 +1222,7 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
             IAnd (Reg RAX, Reg R11);
             ICmp (Reg RAX, Const thread_tag);
             IJne (Label "want_thread_get");
-            IMov (Reg RDI, Reg RAX);
+            IMov (Reg RDI, th);
             IMov (Reg RSI, Reg RBP);
             IMov (Reg RDX, Reg RSP);
             ICall (Label "_loch_thread_get");
@@ -1236,7 +1236,7 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
             IAnd (Reg RAX, Reg R11);
             ICmp (Reg RAX, Const thread_tag);
             IJne (Label "want_thread_start");
-            IMov (Reg RDI, Reg RAX);
+            IMov (Reg RDI, th);
             ICall (Label "_loch_thread_start");
           ]
       | Lock ->

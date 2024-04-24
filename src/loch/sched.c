@@ -38,6 +38,7 @@ tcb_t *sched_next(sched_t *sched) {
   tcb_t *tcb = node->tcb;
   sched->size--;
   sched->head = node->next;
+  free(node);
   if (sched->head == NULL)
     sched->tail = NULL;
 

@@ -429,7 +429,7 @@ void *loch_runner(void *x) {
   // initialize thread local stuff
   state.current_context = NULL;
   state.next_context = NULL;
-  state.thread_id = atomic_fetch_add(&thread_id, 1);
+  state.thread_id = atomic_load(&thread_id);
   check_for_work();
   return NULL;
 }
@@ -437,16 +437,7 @@ _Atomic uint64_t gg = 0;
 #define NUM_TASK 500
 _Atomic(int) cnt[NUM_TASK];
 uint64_t do_something(uint64_t arg) {
-  for (int i = 0; i < 2; i++) {
-    // printf("LOL! %d %llu\n", i, arg);
-
-    cnt[arg]++;
-    gg++;
-    // usleep(50000); // 1s
-    runtime_yield();
-  }
-  printd_mt("FINISHED_TASK!");
-  return 0;
+  return 28; // 14
 }
 
 void loch_setup(void) {

@@ -32,14 +32,7 @@ uint64_t thread_code_starts_here(uint64_t *heap, uint64_t sz,
   }
   return 0;
 }
-uint64_t do_something(uint64_t arg) {
-  for (int i = 0; i < 10; i++) {
-    printf("LOL! %d\n", i);
-    usleep(100000); // 1s
-  }
-  printd_mt("FINISHED_TASK!");
-  return 0;
-}
+
 
 _Atomic uint64_t active_threads = 0;
 sched_t *scheduler;
@@ -50,7 +43,7 @@ void *loch_runner(void *x) {
   // initialize thread local stuff
   state.current_context = NULL;
   state.next_context = NULL;
-  state.thread_id = atomic_fetch_add(&thread_id, 1);
+  state.thread_id = atomic_load(&thread_id);
   check_for_work();
   return NULL;
 }

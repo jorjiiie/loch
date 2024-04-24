@@ -54,9 +54,9 @@ void tcb_runner(uint32_t tcb_high, uint32_t tcb_low, uint32_t closure_high,
   // uint64_t ret = thread_code_starts_here(heap_ptr, HEAP_SIZE, arg);
   uint64_t ret = do_something(arg);
   tcb->result = ret;
-  tcb_destroy(state.current_context);
+  // tcb_destroy(state.current_context);
 
-  state.current_context = state.next_context = NULL;
+  // state.current_context = state.next_context = NULL;
   atomic_store(&tcb->state, FINISHED);
   setcontext(&state.wait_ctx);
 }
@@ -68,14 +68,14 @@ uint64_t tcb_set_stack_bottom(uint64_t *stack_bottom) {
 }
 
 void runtime_yield() {
-
   assert(state.current_context != NULL);
   assert(atomic_load(&state.current_context->state) == RUNNING);
   state.next_context = sched_next(scheduler);
 
   // no other threads, just continue
-  if (state.next_context == NULL)
+  if (state.next_context == NULL) {
     return;
+  }
 
   /*
   printd_mt("be4 STATE %p %p %p", &state, state.current_context,
@@ -156,10 +156,13 @@ uint64_t _loch_thread_create(uint64_t closure) {
   tcb_t *tcb = tcb_create(closure);
   uint64_t t_id = atomic_fetch_add(&thread_id, 1);
   map_put(gc_state->map, t_id, tcb);
-  return t_id;
+  return (t_id << 4);
 }
 
 uint64_t _loch_thread_get(uint64_t thread, uint64_t *rbp, uint64_t *rsp) {
+  // untag thread
+  thread = (thread >> 4);
+
   tcb_t *tcb = map_get(gc_state->map, thread);
   if (tcb == NULL) {
     perror("invalid tcb!");
@@ -176,6 +179,8 @@ uint64_t _loch_thread_get(uint64_t thread, uint64_t *rbp, uint64_t *rsp) {
 }
 
 uint64_t _loch_thread_start(uint64_t thread) {
+  // untag thread
+  thread = (thread >> 4);
   tcb_t *tcb = map_get(gc_state->map, thread);
   if (tcb == NULL) {
     perror("invalid tcb!");
