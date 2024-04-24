@@ -97,7 +97,7 @@ const error_code_t EXPECTED_THREAD_GET = 22;
 gc_t *gc_state;
 _Thread_local thread_state_t state;
 _Atomic uint64_t thread_id = 1;
-_Atomic uint64_t tcb_id = 0;
+_Atomic uint64_t tcb_id = 1;
 _Atomic uint8_t halt_flag = 0;
 sched_t *scheduler;
 
