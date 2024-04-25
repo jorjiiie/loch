@@ -1618,25 +1618,26 @@ let compile_prog ((anfed : tag aprogram), (env : arg envt envt)) : string =
         [
           ILabel "thread_code_starts_here";
           IPush (Reg RBP);
+          IMov (Reg RBP, Reg RSP);
           IPush (Reg R12);
           IPush (Reg R13);
           IPush (Reg R14);
           IPush (Reg R15);
-          IPush(Const 0L);
+
           IInstrComment
             (IMov (Reg scratch_reg, Reg RDI), "Move closure to scratch_reg");
-          IMov (Reg RBP, Reg RSP);
           IMov (Reg RDI, Reg RBP);
           ICall (Label "_loch_set_stack");
+          IPush (Reg scratch_reg);
           ISub (Reg scratch_reg, Const closure_tag);
           IMov (Reg RAX, RegOffset (8, scratch_reg));
           ICall (Reg RAX);
-          IMov (Reg RSP, Reg RBP);
           IPop (Reg R15);
           IPop (Reg R15);
           IPop (Reg R14);
           IPop (Reg R13);
           IPop (Reg R12);
+          IMov (Reg RSP, Reg RBP);
           IPop (Reg RBP);
           IRet;
         ]

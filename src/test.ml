@@ -209,6 +209,8 @@ let thread_tests =
   [
     t "create_thread" "thread((lambda: 1))" "" "<thread 1>";
     t "get_simple_thread" "let t = thread((lambda : 1)) in start(t); get(t)" "" "1";
+    t "benchmark" "def fib(n): if n < 2: n else: fib(n - 1) + fib(n - 2) \
+                 let t = thread((lambda: fib(45))) in start(t); fib(46) + get(t)" "" "2971215073";
 
   ]
 

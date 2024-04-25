@@ -17,7 +17,7 @@
 #include <unistd.h>
 
 // number of threads to execute snake code with
-#define NUM_THREADS 1
+#define NUM_THREADS 2
 
 typedef uint64_t SNAKEVAL;
 

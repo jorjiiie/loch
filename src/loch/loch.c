@@ -73,6 +73,8 @@ void runtime_yield() {
   assert(atomic_load(&state.current_context->state) == RUNNING);
   state.next_context = sched_next(scheduler);
 
+  printlog("next context is %p", state.next_context);
+
   // no other threads, just continue
   if (state.next_context == NULL) {
     return;
@@ -164,34 +166,37 @@ uint64_t _loch_thread_create(uint64_t closure) {
 
 uint64_t _loch_thread_get(uint64_t thread, uint64_t *rbp, uint64_t *rsp) {
   // untag thread
-  thread = (thread >> 4);
+  uint64_t t_id = thread >> 4;
 
-  tcb_t *tcb = map_get(gc_state->map, thread);
+  tcb_t *tcb = map_get(gc_state->map, t_id);
   if (tcb == NULL) {
     perror("invalid tcb!");
     exit(1);
   }
   tcb->frame_bottom = rbp;
   tcb->frame_top = rsp;
+  printlog("trying to get?");
 
   // switch contexts
   while (atomic_load(&tcb->state) != FINISHED) {
+    printlog("waiting to finish!");
     runtime_yield();
   }
+  printlog("got??");
   return tcb->result;
 }
 
 uint64_t _loch_thread_start(uint64_t thread) {
   // untag thread
-  thread = (thread >> 4);
-  tcb_t *tcb = map_get(gc_state->map, thread);
-  printlog("starting something! %llu %p", thread, tcb);
+  uint64_t t_id = thread >> 4;
+  tcb_t *tcb = map_get(gc_state->map, t_id);
+  printlog("starting something! %llu %p", t_id, tcb);
   if (tcb == NULL) {
     perror("invalid tcb!");
     exit(1);
   }
   sched_enqueue(scheduler, tcb);
-  return (thread << 4) | LOCK_TAG;
+  return thread;
 }
 
 uint64_t _loch_set_stack(uint64_t *bottom) {
