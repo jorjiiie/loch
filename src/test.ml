@@ -223,13 +223,23 @@ let thread_tests =
       \            map((lambda (t) : get(t)), x)" ""
       "(2, (3, (4, (5, (6, nil)))))";
   ]
+  let lock_tests = 
+    [
+      t "lock1" "let l = mutex() in lock(l); print(1);unlock(l);2" "" "1\n2";
+      t "lock2" 
+      "def fib(n): if n < 2: n else: fib(n - 1) + fib(n - 2)
+      let l = mutex() in 
+      let t = thread((lambda : lock(l); print(5); unlock(l); lock(l); print(6); unlock(l); 5)) in
+      lock(l); start(t); print(fib(30)); unlock(l); get(t)" "" "832040\n5\n6\n5"
+      
+    ]
 
 let benchmark_tests =
   [
     (* t "benchmark"
-      "def fib(n): if n < 2: n else: fib(n - 1) + fib(n - 2) \n\
-       let t = thread((lambda: fib(45))) in start(t); fib(46) + get(t)" ""
-      "2971215073"; *)
+       "def fib(n): if n < 2: n else: fib(n - 1) + fib(n - 2) \n\
+        let t = thread((lambda: fib(45))) in start(t); fib(46) + get(t)" ""
+       "2971215073"; *)
     t "benchmark2"
       "def fib(n): if n < 2: n else: fib(n - 1) + fib(n - 2)\n\
       \      def map(f, l):\n\
@@ -237,15 +247,17 @@ let benchmark_tests =
       \      else:\n\
       \      let (h, t) = l in\n\
       \        (f(h), map(f, t))\n\
-      \      let x = map((lambda(x) : thread((lambda: fib(x)))), (44, (44, (44, (44, \
-       (44, (44, (44, (44, nil))))))))) in\n\
+      \      let x = map((lambda(x) : thread((lambda: fib(x)))), (44, (44, \
+       (44, (44, (44, (44, (44, (44, nil))))))))) in\n\
        map((lambda (t) : start(t)), x);\n\
       \            map((lambda (t) : get(t)), x)" ""
-      "(701408733, (701408733, (701408733, (701408733, (701408733, (701408733, (701408733, (701408733, nil))))))))";
+      "(701408733, (701408733, (701408733, (701408733, (701408733, (701408733, \
+       (701408733, (701408733, nil))))))))";
   ]
 
 let suite = "unit_tests" >::: pair_tests @ oom @ gc @ input @ gc_suite
 
 let () =
-  run_test_tt_main ("thread_tests" >::: [ "thread_suite" >::: (thread_tests@benchmark_tests) ])
+  run_test_tt_main
+    ("thread_tests" >::: [ "thread_suite" >::: thread_tests @ lock_tests ])
 (* let () = run_test_tt_main ("all_tests" >::: [ suite; input_file_test_suite () ]) *)

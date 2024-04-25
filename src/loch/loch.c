@@ -128,6 +128,7 @@ void check_for_work() {
       atomic_fetch_add(&gc_state->active_threads, 1);
       swapcontext(&state.wait_ctx, &tcb->ctx);
       atomic_fetch_sub(&gc_state->active_threads, 1);
+      
     }
     if (atomic_load(&halt_flag)) {
       printlog("im done? lol");

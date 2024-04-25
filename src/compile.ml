@@ -1532,7 +1532,11 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
       | Prim -> failwith "feels like this isn't supposed to be here"
       | _ -> failwith "fhck")
   | CLambda _ -> compile_clambda e envs ftag false
-  | CMutex _ -> [ ICall (Label "_loch_mutex_create") ]
+  | CMutex _ -> (* mutex constructor *)
+  reserve 2 @ [
+    IMov (Sized (QWORD_PTR, RegOffset(0, RAX)), Const 0L);
+    IAdd (Reg RAX, Const mutex_tag);
+  ]
 (* TODO: NOT THIS*)
 
 and compile_imm (e : tag immexpr) env =

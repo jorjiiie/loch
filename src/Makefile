@@ -4,7 +4,7 @@ SOURCES = gc.c loch.c main.c map.c sched.c set.c tcb.c
 SOURCE_FILES = $(addprefix loch/, $(SOURCES))
 ifeq ($(UNAME), Linux)
   NASM_FORMAT=elf64
-  CLANG_FLAGS=-mstackrealign -m64 -g -fstack-protector-all -Wstack-protector -fno-omit-frame-pointer
+  CLANG_FLAGS=-mstackrealign -m64 -g -fstack-protector-all -Wstack-protector -fno-omit-frame-pointer -DDEBUG -lpthread
 else
 ifeq ($(UNAME), Darwin)
   NASM_FORMAT=macho64
