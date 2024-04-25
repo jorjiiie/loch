@@ -208,14 +208,44 @@ let input = [ t "input1" "let x = input() in x + 2" "123" "125" ]
 let thread_tests =
   [
     t "create_thread" "thread((lambda: 1))" "" "<thread 1>";
-    t "get_simple_thread" "let t = thread((lambda : 1)) in start(t); get(t)" "" "1";
-    t "benchmark" "def fib(n): if n < 2: n else: fib(n - 1) + fib(n - 2) \
-                 let t = thread((lambda: fib(45))) in start(t); fib(46) + get(t)" "" "2971215073";
+    t "get_simple_thread" "let t = thread((lambda : 1)) in start(t); get(t)" ""
+      "1";
+    t "map_t"
+      "def map(f, l):\n\
+      \      if (l == nil): nil\n\
+      \      else:\n\
+      \      let (h, t) = l in\n\
+      \        (f(h), map(f, t))\n\
+      \      def f(x): x + 1\n\
+      \      let x = map((lambda(x) : thread((lambda: f(x)))), (1, (2, (3, (4, \
+       (5, nil)))))) in\n\
+       map((lambda (t) : start(t)), x);\n\
+      \            map((lambda (t) : get(t)), x)" ""
+      "(2, (3, (4, (5, (6, nil)))))";
+  ]
 
+let benchmark_tests =
+  [
+    (* t "benchmark"
+      "def fib(n): if n < 2: n else: fib(n - 1) + fib(n - 2) \n\
+       let t = thread((lambda: fib(45))) in start(t); fib(46) + get(t)" ""
+      "2971215073"; *)
+    t "benchmark2"
+      "def fib(n): if n < 2: n else: fib(n - 1) + fib(n - 2)\n\
+      \      def map(f, l):\n\
+      \      if (l == nil): nil\n\
+      \      else:\n\
+      \      let (h, t) = l in\n\
+      \        (f(h), map(f, t))\n\
+      \      let x = map((lambda(x) : thread((lambda: fib(x)))), (44, (44, (44, (44, \
+       (44, (44, (44, (44, nil))))))))) in\n\
+       map((lambda (t) : start(t)), x);\n\
+      \            map((lambda (t) : get(t)), x)" ""
+      "(701408733, (701408733, (701408733, (701408733, (701408733, (701408733, (701408733, (701408733, nil))))))))";
   ]
 
 let suite = "unit_tests" >::: pair_tests @ oom @ gc @ input @ gc_suite
 
 let () =
-  run_test_tt_main ("thread_tests" >::: [ "thread_suite" >::: thread_tests ])
+  run_test_tt_main ("thread_tests" >::: [ "thread_suite" >::: (thread_tests@benchmark_tests) ])
 (* let () = run_test_tt_main ("all_tests" >::: [ suite; input_file_test_suite () ]) *)
