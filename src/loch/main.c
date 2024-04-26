@@ -99,7 +99,7 @@ _Thread_local thread_state_t state;
 _Atomic uint64_t thread_id = 1;
 _Atomic uint64_t tcb_id = 1;
 _Atomic uint8_t halt_flag = 0;
-_Atomic(uint32_t) reschedule[NUM_THREADS + 10];
+_Atomic(uint8_t) reschedule[NUM_THREADS + 10];
 sched_t *scheduler;
 
 // threads
@@ -492,10 +492,10 @@ int main(int argc, char **argv) {
   sched_enqueue(scheduler, main_tcb);
 
   while (sched_size(scheduler) || atomic_load(&gc_state->active_threads) != 0) {
-    usleep(10000); // 1ms
+    usleep(10000); // 10ms
     for (int i = 1; i <= NUM_THREADS; i++) {
-      // printlog("rescehdueling??? %d",i);
       atomic_store(&reschedule[i], 1);
+
     }
   }
   loch_teardown();

@@ -56,6 +56,7 @@ void tcb_runner(uint32_t tcb_high, uint32_t tcb_low, uint32_t closure_high,
   uint64_t ret = thread_code_starts_here(tcb->closure_ptr);
   // uint64_t ret = do_something(arg);
   tcb->result = ret;
+  printlog("done");
   // tcb_destroy(state.current_context);
 
   // state.current_context = state.next_context = NULL;

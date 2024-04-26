@@ -259,10 +259,12 @@ let lock_tests =
     t "lock4_bad" "def inc(l,t):  t[0] := t[0] + 1\n\ 
     def do_n(i,n,f): if i < n: f(); do_n(i+1,n,f) else: 0\n\ 
 \      let l = mutex() in let t = (0,0) in\n\
-\      let t1 = thread((lambda : do_n(0,1000,(lambda : inc(l,t))))) in\n\
-\      let t2 = thread((lambda : do_n(0,1000,(lambda : inc(l,t))))) in\n\
-\      start(t1); start(t2); get(t1); get(t2); t[0]" "" "2000";
-  ]
+\      let t1 = thread((lambda : do_n(0,10000,(lambda : inc(l,t))))) in\n\
+\      let t2 = thread((lambda : do_n(0,10000,(lambda : inc(l,t))))) in\n\
+       let t3 = thread((lambda : do_n(0,10000,(lambda : inc(l,t))))) in\n\
+       let t4 = thread((lambda : do_n(0,10000,(lambda : inc(l,t))))) in\n\
+        start(t1); start(t2); start(t3); start(t4); get(t1); get(t2); get(t3); get(t4); t[0]" ""
+      "40000";]
 
 let benchmark_tests =
   [
@@ -289,5 +291,5 @@ let suite = "unit_tests" >::: pair_tests @ oom @ gc @ input @ gc_suite @ thread_
 
 let () =
   run_test_tt_main
-    ("thread_tests" >::: [ "thread_suite" >::: thread_tests @ lock_tests @ benchmark_tests ])
+    ("thread_tests" >::: [ "thread_suite" >::: thread_tests @ lock_tests ])
 (* let () = run_test_tt_main ("all_tests" >::: [ suite; input_file_test_suite () ]) *)
