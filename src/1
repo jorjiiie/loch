@@ -1,0 +1,46 @@
+loch/main.c:483:main(): gc pointers are 0x7fe04ef05f60 0x7fe04ef05f60
+loch/main.c:483:main(): gc pointers are 0x7fe04ef05f60 0x7fe04ef05f60
+loch/loch.c:121:check_for_work(): init
+loch/loch.c:121:check_for_work(): init
+loch/loch.c:125:check_for_work():thread_1: no work to do!
+loch/loch.c:125:check_for_work():thread_1: no work to do!
+loch/loch.c:121:check_for_work(): init
+loch/loch.c:121:check_for_work(): init
+loch/loch.c:125:check_for_work():thread_2: no work to do!
+loch/loch.c:125:check_for_work():thread_2: no work to do!
+loch/loch.c:121:check_for_work(): init
+loch/loch.c:125:check_for_work():thread_3: no work to do!
+loch/loch.c:121:check_for_work(): init
+loch/loch.c:125:check_for_work():thread_3: no work to do!
+loch/loch.c:121:check_for_work(): init
+loch/loch.c:125:check_for_work():thread_4: no work to do!
+loch/loch.c:121:check_for_work(): init
+loch/loch.c:125:check_for_work():thread_4: no work to do!
+loch/loch.c:121:check_for_work(): init
+loch/loch.c:125:check_for_work():thread_5: no work to do!
+loch/loch.c:121:check_for_work(): init
+loch/loch.c:125:check_for_work():thread_5: no work to do!
+loch/loch.c:121:check_for_work(): init
+loch/loch.c:125:check_for_work():thread_6: no work to do!
+loch/loch.c:121:check_for_work(): init
+loch/loch.c:125:check_for_work():thread_6: no work to do!
+loch/loch.c:121:check_for_work(): init
+loch/loch.c:125:check_for_work():thread_7: no work to do!
+loch/loch.c:121:check_for_work(): init
+loch/loch.c:125:check_for_work():thread_7: no work to do!
+loch/tcb.c:14:tcb_create(): making closure with 0loch/tcb.c:14:tcb_create(): making closure with 0
+loch/loch.c:121:check_for_work(): init
+loch/loch.c:125:check_for_work():thread_8: no work to do!
+loch/loch.c:121:check_for_work(): init
+loch/loch.c:125:check_for_work():thread_8: no work to do!
+
+loch/map.c:70:map_put(): what is going on 0 0 0x7fe04f00a808
+loch/map.c:83:map_put(): putting 0 0x7fe04fb043a0
+loch/map.c:70:map_put(): what is going on 0 0 0x7fe04f00a808
+loch/map.c:83:map_put(): putting 0 0x7fe04fb043a0
+loch/loch.c:125:check_for_work():thread_2: no work to do!
+loch/loch.c:125:check_for_work():thread_2: no work to do!
+Allocation error: needed 4 words, but the heap is only 0 words
+Allocation error: needed 4 words, but the heap is only 0 words
+Allocation Error: Out of memory: needed 4 words, but only 0 remain after collection
+Allocation Error: Out of memory: needed 4 words, but only 0 remain after collection

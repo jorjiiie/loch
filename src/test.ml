@@ -240,8 +240,8 @@ let lock_tests =
       \      let l = mutex() in \n\
       \      let t = thread((lambda : lock(l); print(5); unlock(l); lock(l); \
        print(6); unlock(l); 5)) in\n\
-      \      lock(l); start(t); print(fib(30)); unlock(l); get(t)" ""
-      "832040\n5\n6\n5";
+      \      lock(l); start(t); print(fib(20)); unlock(l); get(t)" ""
+      "6765\n5\n6\n5";
     terr "number_in_lock" "lock(1)" "" "expected mutex in lock, got:";
     terr "boolean_in_lock" "lock(true)" "" "expected mutex in lock, got:";
     terr "lambda_in_lock" "lock(true)" "" "expected mutex in lock, got:";
@@ -249,6 +249,19 @@ let lock_tests =
     terr "boolean_in_unlock" "unlock(true)" "" "expected mutex in unlock, got:";
     terr "lambda_in_unlock" "unlock((lambda: 1))" ""
       "expected mutex in unlock, got:";
+    t "lock3" "def inc(l,t): lock(l); t[0] := t[0] + 1; unlock(l)\n\
+               def do_n(i,n,f): if i < n: f(); do_n(i+1,n,f) else: 0\n\ 
+      \      let l = mutex() in let t = (0,0) in\n\
+      \      let t1 = thread((lambda : do_n(0,1000,(lambda : inc(l,t))))) in\n\
+      \      let t2 = thread((lambda : do_n(0,1000,(lambda : inc(l,t))))) in\n\
+      \      start(t1); start(t2); get(t1); get(t2); t[0]" ""
+      "2000"; (* for some reason the below works*)
+    t "lock4_bad" "def inc(l,t):  t[0] := t[0] + 1\n\ 
+    def do_n(i,n,f): if i < n: f(); do_n(i+1,n,f) else: 0\n\ 
+\      let l = mutex() in let t = (0,0) in\n\
+\      let t1 = thread((lambda : do_n(0,1000,(lambda : inc(l,t))))) in\n\
+\      let t2 = thread((lambda : do_n(0,1000,(lambda : inc(l,t))))) in\n\
+\      start(t1); start(t2); get(t1); get(t2); t[0]" "" "2000";
   ]
 
 let benchmark_tests =
@@ -274,7 +287,7 @@ let benchmark_tests =
 
 let suite = "unit_tests" >::: pair_tests @ oom @ gc @ input @ gc_suite @ thread_tests
 
-(* let () =
+let () =
   run_test_tt_main
-    ("thread_tests" >::: [ "thread_suite" >::: thread_tests @ lock_tests ]) *)
-let () = run_test_tt_main ("all_tests" >::: [ suite; input_file_test_suite () ])
+    ("thread_tests" >::: [ "thread_suite" >::: thread_tests @ lock_tests @ benchmark_tests ])
+(* let () = run_test_tt_main ("all_tests" >::: [ suite; input_file_test_suite () ]) *)

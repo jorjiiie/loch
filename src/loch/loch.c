@@ -141,16 +141,16 @@ void check_for_work() {
 }
 
 uint64_t _loch_yield(uint64_t *rbp, uint64_t *rsp) {
-  printd("yield from loch! %p %p", rbp, rsp);
+  // printd("yield from loch! %p %p", rbp, rsp);
 
   state.current_context->frame_bottom = rbp;
   state.current_context->frame_top = rsp;
-  // if (atomic_load(&reschedule[state.thread_id])) {
-  //   atomic_store(&reschedule[state.thread_id], 0);
-  // } else {
-  //   // no need to reschedule
-  //   return 0;
-  // }
+  if (atomic_load(&reschedule[state.thread_id])) {
+    atomic_store(&reschedule[state.thread_id], 0);
+  } else {
+    // no need to reschedule
+    return 0;
+  }
   // for thread to GC, we must have THREADS - 1 ack's
   // although this MUST work for the number of running threads!
   // check if GC is necessary

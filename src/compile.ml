@@ -1005,12 +1005,12 @@ and compile_clambda (e : tag cexpr) (envs : arg envt envt) (ftag : string)
       @ List.map
           (fun _ -> IPush (Const 0L))
           (List.init (aligned_sz / 8) (fun _ -> 0))
-      (* @ [
+      @ [
            ILineComment "Yield";
            IMov (Reg RDI, Reg RBP);
            IMov (Reg RSI, Reg RSP);
            ICall (Label "_loch_yield");
-         ] *)
+         ]
       @ [
           IInstrComment
             ( IMov (Reg scratch_reg, RegOffset (16, RBP)),
