@@ -147,7 +147,7 @@ uint64_t *reserve(uint64_t wanted, uint64_t *rbp, uint64_t *rsp) {
 
     free(gc_state->heap_start);
 
-    // i am not going to both clearing everyone out
+    // i am not going to both clear(lambda: 1iing everyone out
     if (new_ptr + wanted > (new_heap + gc_state->HEAP_SIZE)) {
       fprintf(
           stderr,
@@ -405,7 +405,7 @@ void error(uint64_t code, SNAKEVAL val) {
     fprintf(stderr, "Error: expected thread for start, got:");
     break;
   case EXPECTED_THREAD_GET:
-    fprintf(stderr, "Error: expected threat for get, got:");
+    fprintf(stderr, "Error: expected thread for get, got:");
     break;
   default:
     fprintf(stderr, "Error: Unknown error code: %llu, val: ", code);

@@ -227,6 +227,8 @@ let thread_tests =
       "expected lambda for thread, got:";
     terr "number_in_start" "start(1)" "" "expected thread for start, got:";
     terr "lambda_in_start" "start((lambda: 1))" "" "expected thread for start, got:";
+    terr "lambda_in_get" "get((lambda: 1))" "" "expected thread for get, got:";
+    terr "number_in_get" "get(3)" "" "expected thread for get, got:"
   ]
 
 let lock_tests =
