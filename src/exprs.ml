@@ -35,7 +35,6 @@ type prim2 =
   | LessEq
   | Eq
   | CheckSize
-  | ScopedLock
 
 and 'a bind =
   | BBlank of 'a

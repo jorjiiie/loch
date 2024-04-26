@@ -86,7 +86,6 @@ rule token = parse
   | "mutex" { MUTEX }
   | "lock" { LOCK }
   | "unlock" { UNLOCK }
-  | "scopedlock" { SCOPEDLOCK }
   | ident as x { if x = "_" then UNDERSCORE else ID x }
   | eof { EOF }
   | _ as c { failwith (sprintf "Unrecognized character: %c" c) }

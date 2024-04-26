@@ -1416,8 +1416,7 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
             IJe (Label jmp_label);
             IMov (Reg RAX, const_false);
             ILabel jmp_label;
-          ]
-      | ScopedLock -> failwith "scoped lock not implemented yet")
+          ])
   | CIf (cond, e1, e2, t) ->
       let comp_cond = compile_imm cond env in
       let comp_e1 = compile_aexpr e1 envs ftag 0 false in

@@ -54,7 +54,6 @@ let string_of_op2 op =
   | LessEq -> "<="
   | Eq -> "=="
   | CheckSize -> "check_size"
-  | ScopedLock -> "scoped_lock"
 
 let name_of_op2 op =
   match op with
@@ -69,7 +68,6 @@ let name_of_op2 op =
   | LessEq -> "LessEq"
   | Eq -> "Eq"
   | CheckSize -> "CheckSize"
-  | ScopedLock -> "ScopedLock"
 
 let rec string_of_bind (b : 'a bind) : string =
   match b with
@@ -112,9 +110,6 @@ and string_of_expr_with (depth : int) (print_a : 'a -> string) (e : 'a expr) :
     | EId (x, a) -> x ^ print_a a
     | EPrim1 (op, e, a) ->
         sprintf "%s(%s)%s" (string_of_op1 op) (string_of_expr e) (print_a a)
-    | EPrim2 (ScopedLock, first, second, a) ->
-        sprintf "(ScopedLock %s %s)%s" (string_of_expr first)
-          (string_of_expr second) (print_a a)
     | EPrim2 (op, left, right, a) ->
         sprintf "(%s %s %s)%s" (string_of_expr left) (string_of_op2 op)
           (string_of_expr right) (print_a a)
