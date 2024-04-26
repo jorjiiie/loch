@@ -20,6 +20,7 @@
 
 extern uint64_t
 thread_code_starts_here(uint64_t closure) asm("thread_code_starts_here");
+extern _Atomic uint8_t reschedule[];
 
 
 /*
@@ -71,6 +72,8 @@ uint64_t tcb_set_stack_bottom(uint64_t *stack_bottom) {
 void runtime_yield() {
   assert(state.current_context != NULL);
   assert(atomic_load(&state.current_context->state) == RUNNING);
+
+
   state.next_context = sched_next(scheduler);
 
   printlog("next context is %p", state.next_context);
@@ -142,7 +145,12 @@ uint64_t _loch_yield(uint64_t *rbp, uint64_t *rsp) {
 
   state.current_context->frame_bottom = rbp;
   state.current_context->frame_top = rsp;
-
+  // if (atomic_load(&reschedule[state.thread_id])) {
+  //   atomic_store(&reschedule[state.thread_id], 0);
+  // } else {
+  //   // no need to reschedule
+  //   return 0;
+  // }
   // for thread to GC, we must have THREADS - 1 ack's
   // although this MUST work for the number of running threads!
   // check if GC is necessary

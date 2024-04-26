@@ -8,7 +8,7 @@ ifeq ($(UNAME), Linux)
 else
 ifeq ($(UNAME), Darwin)
   NASM_FORMAT=macho64
-  CLANG_FLAGS=-mstackrealign -m64 -g -fstack-protector-all -Wstack-protector -fno-omit-frame-pointer -arch x86_64
+  CLANG_FLAGS=-mstackrealign -m64 -g -fstack-protector-all -Wstack-protector -fno-omit-frame-pointer -arch x86_64 -DDEBUG
   endif
 endif
 

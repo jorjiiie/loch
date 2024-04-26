@@ -272,9 +272,9 @@ let benchmark_tests =
        (701408733, (701408733, nil))))))))";
   ]
 
-let suite = "unit_tests" >::: pair_tests @ oom @ gc @ input @ gc_suite
+let suite = "unit_tests" >::: pair_tests @ oom @ gc @ input @ gc_suite @ thread_tests
 
-let () =
+(* let () =
   run_test_tt_main
-    ("thread_tests" >::: [ "thread_suite" >::: thread_tests @ lock_tests ])
-(* let () = run_test_tt_main ("all_tests" >::: [ suite; input_file_test_suite () ]) *)
+    ("thread_tests" >::: [ "thread_suite" >::: thread_tests @ lock_tests ]) *)
+let () = run_test_tt_main ("all_tests" >::: [ suite; input_file_test_suite () ])

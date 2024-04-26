@@ -994,15 +994,14 @@ and compile_clambda (e : tag cexpr) (envs : arg envt envt) (ftag : string)
       let lambda_sz = 3 + sz + ((3 + sz) mod 2) in
       let tmp_sz = deepest_stack (find envs n_tag) in
       let aligned_sz = tmp_sz + (tmp_sz mod 16) in
-      [ IJmp (Label end_label) ]
-      @ [ IInstrComment (ILabel start_label, "Lambda Body") ]
-        (* put the yield call here! *)
-      @ [
-          ILineComment "Adjust stack pointer";
-          IPush (Reg RBP);
-          IMov (Reg RBP, Reg RSP);
-          ILineComment (sprintf "ISub RSP, %d" aligned_sz);
-        ]
+      [
+        IJmp (Label end_label);
+        IInstrComment (ILabel start_label, "Lambda Body");
+        ILineComment "Adjust stack pointer";
+        IPush (Reg RBP);
+        IMov (Reg RBP, Reg RSP);
+        ILineComment (sprintf "ISub RSP, %d" aligned_sz);
+      ]
       @ List.map
           (fun _ -> IPush (Const 0L))
           (List.init (aligned_sz / 8) (fun _ -> 0))
@@ -1517,12 +1516,13 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
           IMov (Reg scratch_reg, a2);
           IShr (Reg scratch_reg, Const 1L);
           IInstrComment
-            ( IMov
+            ( IXchg
                 ( Sized
                     ( QWORD_PTR,
                       RegOffsetReg (scratch_reg2, scratch_reg, word_size, 8) ),
                   Reg RAX ),
               "Move value to offset (SetItem)" );
+              IMov (Reg RAX, a3);
         ]
   | CApp (name, args, call, _) -> (
       match call with
