@@ -390,10 +390,10 @@ void error(uint64_t code, SNAKEVAL val) {
     fprintf(stderr, "Error: arity mismatch in call\n");
     goto skip_print;
   case EXPECTED_LOCK_LOCK:
-    fprintf(stderr, "Error: expected mutex lock, got:");
+    fprintf(stderr, "Error: expected mutex in lock, got:");
     break;
   case EXPECTED_LOCK_UNLOCK:
-    fprintf(stderr, "Error: expected mutex unlock, got:");
+    fprintf(stderr, "Error: expected mutex in unlock, got:");
     break;
   case EXPECTED_LAMBDA_SCOPED:
     fprintf(stderr, "Error: expected lambda scoped, got:");

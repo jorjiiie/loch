@@ -226,9 +226,10 @@ let thread_tests =
     terr "boolean_in_thread" "thread(true)" ""
       "expected lambda for thread, got:";
     terr "number_in_start" "start(1)" "" "expected thread for start, got:";
-    terr "lambda_in_start" "start((lambda: 1))" "" "expected thread for start, got:";
+    terr "lambda_in_start" "start((lambda: 1))" ""
+      "expected thread for start, got:";
     terr "lambda_in_get" "get((lambda: 1))" "" "expected thread for get, got:";
-    terr "number_in_get" "get(3)" "" "expected thread for get, got:"
+    terr "number_in_get" "get(3)" "" "expected thread for get, got:";
   ]
 
 let lock_tests =
@@ -241,6 +242,13 @@ let lock_tests =
        print(6); unlock(l); 5)) in\n\
       \      lock(l); start(t); print(fib(30)); unlock(l); get(t)" ""
       "832040\n5\n6\n5";
+    terr "number_in_lock" "lock(1)" "" "expected mutex in lock, got:";
+    terr "boolean_in_lock" "lock(true)" "" "expected mutex in lock, got:";
+    terr "lambda_in_lock" "lock(true)" "" "expected mutex in lock, got:";
+    terr "number_in_unlock" "unlock(-123)" "" "expected mutex in unlock, got:";
+    terr "boolean_in_unlock" "unlock(true)" "" "expected mutex in unlock, got:";
+    terr "lambda_in_unlock" "unlock((lambda: 1))" ""
+      "expected mutex in unlock, got:";
   ]
 
 let benchmark_tests =

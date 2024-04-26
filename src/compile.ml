@@ -47,7 +47,7 @@ let tuple_tag = 0x0000000000000001L
 let tuple_mask = 0x000000000000000fL
 let thread_tag = 0x0000000000000009L
 let thread_mask = 0x000000000000000fL
-let mutex_tag = 0x000000000000000aL
+let mutex_tag = 0x000000000000000bL
 let mutex_mask = 0x000000000000000fL
 let pad_const = Const (Int64.of_string "0x69420f3f0")
 let nil_value = 0x0000000000000001L
@@ -1537,11 +1537,15 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
       | Prim -> failwith "feels like this isn't supposed to be here"
       | _ -> failwith "fhck")
   | CLambda _ -> compile_clambda e envs ftag false
-  | CMutex _ -> (* mutex constructor *)
-  reserve 2 @ [
-    IMov (Sized (QWORD_PTR, RegOffset(0, RAX)), Const 0L);
-    IAdd (Reg RAX, Const mutex_tag);
-  ]
+  | CMutex _ ->
+      (* mutex constructor *)
+      reserve 2
+      @ [
+          IInstrComment
+            ( IMov (Sized (QWORD_PTR, RegOffset (0, RAX)), Const 0L),
+              "creating mutex" );
+          IInstrComment (IAdd (Reg RAX, Const mutex_tag), "tag mutex");
+        ]
 (* TODO: NOT THIS*)
 
 and compile_imm (e : tag immexpr) env =
@@ -1632,7 +1636,6 @@ let compile_prog ((anfed : tag aprogram), (env : arg envt envt)) : string =
           IPush (Reg R13);
           IPush (Reg R14);
           IPush (Reg R15);
-
           IInstrComment
             (IMov (Reg scratch_reg, Reg RDI), "Move closure to scratch_reg");
           IMov (Reg RDI, Reg RBP);
