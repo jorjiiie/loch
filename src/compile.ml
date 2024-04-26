@@ -1214,6 +1214,7 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
             IMov (Reg R11, Const closure_tag_mask);
             IAnd (Reg RAX, Reg R11);
             ICmp (Reg RAX, Const closure_tag);
+            IMov (Reg RAX, lam);
             IJne (Label "want_closure_thread");
             IMov (Reg RDI, lam);
             ICall (Label "_loch_thread_create");
@@ -1227,6 +1228,7 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
             IMov (Reg R11, Const thread_mask);
             IAnd (Reg RAX, Reg R11);
             ICmp (Reg RAX, Const thread_tag);
+            IMov (Reg RAX, th);
             IJne (Label "want_thread_get");
             IMov (Reg RDI, th);
             IMov (Reg RSI, Reg RBP);
@@ -1241,6 +1243,7 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
             IMov (Reg R11, Const thread_mask);
             IAnd (Reg RAX, Reg R11);
             ICmp (Reg RAX, Const thread_tag);
+            IMov (Reg RAX, th);
             IJne (Label "want_thread_start");
             IMov (Reg RDI, th);
             ICall (Label "_loch_thread_start");
@@ -1255,6 +1258,7 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
             IMov (Reg R11, Const mutex_mask);
             IAnd (Reg RAX, Reg R11);
             ICmp (Reg RAX, Const mutex_tag);
+            IMov (Reg RAX, mtx);
             IJne (Label "want_mutex_lock");
             ILabel loop_label;
             IMov (Reg R12, mtx);
@@ -1276,6 +1280,7 @@ and compile_cexpr (e : tag cexpr) (envs : arg envt envt) (ftag : string)
             IMov (Reg R11, Const mutex_mask);
             IAnd (Reg RAX, Reg R11);
             ICmp (Reg RAX, Const mutex_tag);
+            IMov (Reg RAX, mtx);
             IJne (Label "want_mutex_unlock");
             IMov (Reg R12, mtx);
             ISub (Reg R12, Const mutex_tag);

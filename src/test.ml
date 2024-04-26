@@ -222,17 +222,24 @@ let thread_tests =
        map((lambda (t) : start(t)), x);\n\
       \            map((lambda (t) : get(t)), x)" ""
       "(2, (3, (4, (5, (6, nil)))))";
+    terr "number_in_thread" "thread(1)" "" "expected lambda for thread, got:";
+    terr "boolean_in_thread" "thread(true)" ""
+      "expected lambda for thread, got:";
+    terr "number_in_start" "start(1)" "" "expected thread for start, got:";
+    terr "lambda_in_start" "start((lambda: 1))" "" "expected thread for start, got:";
   ]
-  let lock_tests = 
-    [
-      t "lock1" "let l = mutex() in lock(l); print(1);unlock(l);2" "" "1\n2";
-      t "lock2" 
-      "def fib(n): if n < 2: n else: fib(n - 1) + fib(n - 2)
-      let l = mutex() in 
-      let t = thread((lambda : lock(l); print(5); unlock(l); lock(l); print(6); unlock(l); 5)) in
-      lock(l); start(t); print(fib(30)); unlock(l); get(t)" "" "832040\n5\n6\n5"
-      
-    ]
+
+let lock_tests =
+  [
+    t "lock1" "let l = mutex() in lock(l); print(1);unlock(l);2" "" "1\n2";
+    t "lock2"
+      "def fib(n): if n < 2: n else: fib(n - 1) + fib(n - 2)\n\
+      \      let l = mutex() in \n\
+      \      let t = thread((lambda : lock(l); print(5); unlock(l); lock(l); \
+       print(6); unlock(l); 5)) in\n\
+      \      lock(l); start(t); print(fib(30)); unlock(l); get(t)" ""
+      "832040\n5\n6\n5";
+  ]
 
 let benchmark_tests =
   [
